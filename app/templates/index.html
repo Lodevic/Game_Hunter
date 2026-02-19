@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Hunter</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --red: #e63946;
+        --dark: #0a0a0a;
+        --dark2: #111111;
+        --dark3: #1a1a1a;
+        --gray: #2a2a2a;
+        --light: #f0f0f0;
+        --muted: #888;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--dark);
+        color: var(--light);
+        font-family: "Rajdhani", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* ── NAVBAR ── */
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 48px;
+        background: rgba(10, 10, 10, 0.95);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 1px solid #1f1f1f;
+        backdrop-filter: blur(12px);
+      }
+
+      .logo {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: var(--light);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        list-style: none;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        transition: color 0.2s;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--red);
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .btn-login {
+        background: transparent;
+        border: 1.5px solid var(--light);
+        color: var(--light);
+        padding: 8px 22px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .btn-login:hover {
+        background: var(--red);
+        border-color: var(--red);
+      }
+
+      .avatar-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--gray);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .avatar-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--muted);
+      }
+
+      /* ── HERO BANNER ── */
+      .hero {
+        position: relative;
+        height: 380px;
+        overflow: hidden;
+      }
+
+      .hero-slider {
+        display: flex;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.77, 0, 0.18, 1);
+      }
+
+      .hero-slide {
+        min-width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .hero-slide::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to right,
+          rgba(0, 0, 0, 0.7) 30%,
+          transparent 100%
+        );
+      }
+
+      /* Simulated game covers */
+      .slide-1 {
+        background: linear-gradient(135deg, #1a0a00, #8b1a00, #ff4500, #ff8c00);
+      }
+      .slide-2 {
+        background: linear-gradient(135deg, #000, #003366, #0055bb);
+      }
+      .slide-3 {
+        background: linear-gradient(135deg, #001a00, #003300, #1a6600);
+      }
+      .slide-4 {
+        background: linear-gradient(135deg, #1a001a, #4b0082, #8b008b);
+      }
+
+      .slide-label {
+        position: absolute;
+        bottom: 24px;
+        left: 40px;
+        z-index: 2;
+        font-family: "Orbitron", sans-serif;
+        font-size: 2rem;
+        font-weight: 900;
+        text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+      }
+
+      .slide-label span {
+        color: var(--red);
+      }
+
+      .slider-dots {
+        position: absolute;
+        bottom: 16px;
+        right: 32px;
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .dot.active {
+        background: var(--red);
+      }
+
+      /* ── HERO TAGLINE ── */
+      .hero-tagline {
+        background: var(--dark2);
+        padding: 60px 48px;
+        text-align: center;
+      }
+
+      .hero-tagline h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.2rem;
+        font-weight: 900;
+        letter-spacing: 3px;
+        margin-bottom: 12px;
+      }
+
+      .hero-tagline p {
+        color: var(--red);
+        font-size: 1.15rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 32px;
+      }
+
+      .btn-start {
+        display: inline-block;
+        padding: 14px 40px;
+        border: 2px solid var(--light);
+        color: var(--light);
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        cursor: pointer;
+        background: transparent;
+        border-radius: 4px;
+        transition: all 0.25s;
+        text-decoration: none;
+      }
+
+      .btn-start:hover {
+        background: var(--red);
+        border-color: var(--red);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(230, 57, 70, 0.4);
+      }
+
+      /* ── STATS ROW ── */
+      .stats {
+        background: var(--dark2);
+        padding: 20px 48px 60px;
+        display: flex;
+        justify-content: center;
+        gap: 48px;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        background: var(--gray);
+        border-radius: 12px;
+        padding: 32px 40px;
+        text-align: center;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-icon svg {
+        width: 34px;
+        height: 34px;
+        fill: var(--light);
+      }
+
+      .stat-card .stat-num {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 900;
+      }
+
+      .stat-card .stat-label {
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        line-height: 1.4;
+      }
+
+      /* ── FEATURE SECTION ── */
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        padding: 80px 80px;
+        background: var(--dark);
+        border-top: 1px solid #1a1a1a;
+      }
+
+      .feature-img {
+        flex-shrink: 0;
+        width: 220px;
+        height: 220px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 6rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      }
+
+      .feature-text h2 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--red);
+        margin-bottom: 16px;
+      }
+
+      .feature-text p {
+        font-size: 1.05rem;
+        line-height: 1.75;
+        color: #ccc;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── POPULAR GAMES ── */
+      .popular {
+        padding: 60px 48px;
+        background: var(--dark2);
+        border-top: 1px solid #1a1a1a;
+      }
+
+      .popular h2 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.3rem;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: var(--red);
+        margin-bottom: 28px;
+      }
+
+      .games-scroll {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding-bottom: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--gray) transparent;
+      }
+
+      .games-scroll::-webkit-scrollbar {
+        height: 4px;
+      }
+      .games-scroll::-webkit-scrollbar-thumb {
+        background: var(--gray);
+        border-radius: 2px;
+      }
+
+      .game-card {
+        flex-shrink: 0;
+        width: 160px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .game-card:hover {
+        transform: translateY(-6px);
+      }
+
+      .game-cover {
+        width: 160px;
+        height: 210px;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+        padding: 12px;
+        margin-bottom: 10px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        background-size: cover;
+      }
+
+      .cover-elden {
+        background: linear-gradient(135deg, #1a0000, #5a2200, #c87800);
+      }
+      .cover-lastofus {
+        background: linear-gradient(135deg, #0a1a00, #1a3300, #2d5a1b);
+      }
+      .cover-dota2 {
+        background: linear-gradient(135deg, #000510, #001a40, #002a6b);
+      }
+      .cover-efootball {
+        background: linear-gradient(135deg, #001a00, #003300, #005500);
+      }
+      .cover-spiderman {
+        background: linear-gradient(135deg, #1a0000, #6b0000, #cc0000);
+      }
+      .cover-pubg {
+        background: linear-gradient(135deg, #1a1000, #3d2b00, #6b4900);
+      }
+
+      .game-card p {
+        color: var(--light);
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        background: var(--dark3);
+        border-top: 1px solid #1f1f1f;
+        padding: 32px 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .footer-left .footer-logo {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+      }
+
+      .footer-left .footer-logo span {
+        color: var(--red);
+      }
+
+      .footer-left p {
+        font-size: 0.85rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .footer-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      .footer-right p {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .socials {
+        display: flex;
+        gap: 12px;
+      }
+
+      .social-btn {
+        width: 36px;
+        height: 36px;
+        background: var(--gray);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+      }
+
+      .social-btn:hover {
+        background: var(--red);
+      }
+      .social-btn svg {
+        width: 18px;
+        height: 18px;
+        fill: var(--light);
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-up {
+        animation: fadeUp 0.7s ease forwards;
+      }
+      .delay-1 {
+        animation-delay: 0.1s;
+        opacity: 0;
+      }
+      .delay-2 {
+        animation-delay: 0.25s;
+        opacity: 0;
+      }
+      .delay-3 {
+        animation-delay: 0.4s;
+        opacity: 0;
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          padding: 14px 20px;
+        }
+        .hero-tagline,
+        .stats,
+        .popular {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        .feature {
+          flex-direction: column;
+          padding: 40px 20px;
+        }
+        footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .footer-right {
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav>
+      <div class="logo">GAME HUNTER</div>
+      <ul class="nav-links">
+        <li><a href="#" class="active">Profil Sistem</a></li>
+        <li><a href="#fitur">Fitur</a></li>
+        <li><a href="#popular">Game Popular</a></li>
+      </ul>
+      <div class="nav-right">
+        <div class="avatar-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+            />
+          </svg>
+        </div>
+        <a href="/login"><button class="btn-login">Login</button></a>
+      </div>
+    </nav>
+
+    <!-- HERO SLIDER -->
+    <section class="hero">
+      <div class="hero-slider" id="slider">
+        <div class="hero-slide slide-1">
+          <div class="slide-label"><span>eFootball™</span> 2025</div>
+        </div>
+        <div class="hero-slide slide-2">
+          <div class="slide-label"><span>SPIDER-MAN 2</span></div>
+        </div>
+        <div class="hero-slide slide-3">
+          <div class="slide-label">PUBG <span>BATTLEGROUNDS</span></div>
+        </div>
+        <div class="hero-slide slide-4">
+          <div class="slide-label"><span>DOTA</span> 2</div>
+        </div>
+      </div>
+      <div class="slider-dots" id="dots"></div>
+    </section>
+
+    <!-- HERO TAGLINE -->
+    <section class="hero-tagline">
+      <h1 class="fade-up delay-1">Level Up Your Game Choices!</h1>
+      <p class="fade-up delay-2">
+        Get accurate game recommendations based on favorite genres.
+      </p>
+      <a href="#" class="btn-start fade-up delay-3">[ Start Playing ]</a>
+    </section>
+
+    <!-- STATS ROW -->
+    <section class="stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <!-- gamepad icon -->
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M17.5 7H6.5C4 7 2 9 2 11.5v1C2 15 4 17 6.5 17h11c2.5 0 4.5-2 4.5-4.5v-1C22 9 20 7 17.5 7zM10 13H8v2H6v-2H4v-2h2V9h2v2h2v2zm4.5 1c-.8 0-1.5-.7-1.5-1.5S13.7 11 14.5 11s1.5.7 1.5 1.5S15.3 14 14.5 14zm3 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5S18.3 14 17.5 14z"
+            />
+          </svg>
+        </div>
+        <div class="stat-num">2000+</div>
+        <div class="stat-label">Popular Games<br />Analyzed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <!-- balance/genre icon -->
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M13 3v18h-2V3h2zM5 7.5l-3 9h6l-3-9zm14 0l-3 9h6l-3-9zM4.68 15h.64l-.32-.97-.32.97zM18.68 15h.64l-.32-.97-.32.97z"
+            />
+          </svg>
+        </div>
+        <div class="stat-num">Advanced</div>
+        <div class="stat-label">
+          Genre &amp; Rating-Based<br />Matching Engine
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <!-- thumbs up icon -->
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"
+            />
+          </svg>
+        </div>
+        <div class="stat-num">Thousands</div>
+        <div class="stat-label">
+          of Personalized<br />Recommendations<br />Delivered
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURE SECTION -->
+    <section class="feature" id="fitur">
+      <div class="feature-img">🎮</div>
+      <div class="feature-text">
+        <h2>CORE FEATURE: GENRE-BASED RECOMMENDATION</h2>
+        <p>
+          Our core feature, Genre-Based Recommendation, is designed to deliver a
+          highly personalized content discovery experience. It first
+          intelligently filters the library based on your preferred genres. For
+          immediate access to the best content, all results are then
+          automatically sorted by the highest rating by default. Furthermore,
+          you can utilize our advanced filtering options to refine the
+          selections further by choosing other specific features such as
+          single-player, multiplayer, co-op, or cross-platform capabilities,
+          ensuring you find exactly what you're looking for.
+        </p>
+      </div>
+    </section>
+
+    <!-- POPULAR GAMES -->
+    <section class="popular" id="popular">
+      <h2>Popular Game</h2>
+      <div class="games-scroll">
+        <div class="game-card">
+          <div class="game-cover cover-elden">ELDEN RING</div>
+          <p>Elden Ring</p>
+        </div>
+
+        <div class="game-card">
+          <div class="game-cover cover-lastofus">THE LAST OF US</div>
+          <p>The Last Of Us Part 1</p>
+        </div>
+
+        <div class="game-card">
+          <div class="game-cover cover-dota2">DOTA 2</div>
+          <p>Dota 2</p>
+        </div>
+
+        <div class="game-card">
+          <div class="game-cover cover-efootball">eFOOTBALL™</div>
+          <p>eFootball™</p>
+        </div>
+
+        <div class="game-card">
+          <div class="game-cover cover-spiderman">SPIDER-MAN 2</div>
+          <p>Marvel's Spider-Man 2</p>
+        </div>
+
+        <div class="game-card">
+          <div class="game-cover cover-pubg">PUBG</div>
+          <p>PUBG Battlegrounds</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-left">
+        <div class="footer-logo"><span>© 2025</span> GAME HUNTER</div>
+        <p>Contact us<br />gamehunterz@gmail.com<br />+6281234567890</p>
+      </div>
+      <div class="footer-right">
+        <p>Follow us</p>
+        <div class="socials">
+          <!-- Instagram -->
+          <a class="social-btn" href="#">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4c0 3.2-2.6 5.8-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8C2 4.6 4.6 2 7.8 2zm-.2 2C5.6 4 4 5.6 4 7.6v8.8C4 18.4 5.6 20 7.6 20h8.8c2 0 3.6-1.6 3.6-3.6V7.6C20 5.6 18.4 4 16.4 4H7.6zm9.65 1.5c.7 0 1.25.55 1.25 1.25S17.95 8 17.25 8 16 7.45 16 6.75s.55-1.25 1.25-1.25zM12 7c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5zm0 2c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"
+              />
+            </svg>
+          </a>
+          <!-- YouTube -->
+          <a class="social-btn" href="#">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M21.6 7.2s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.1 4 12 4 12 4s-4.1 0-6.8.3c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 8.7 2 10.3v1.5c0 1.5.2 3.1.2 3.1s.2 1.4.8 2c.8.8 1.8.8 2.2.9C6.7 18 12 18 12 18s4.1 0 6.8-.3c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.5.2-3.1v-1.5C22 8.7 21.6 7.2 21.6 7.2zM10 14.5v-5l5 2.5-5 2.5z"
+              />
+            </svg>
+          </a>
+          <!-- TikTok -->
+          <a class="social-btn" href="#">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M19.6 3.8c-1-.6-1.7-1.6-2-2.8h-3.1v13.4c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5c.2 0 .5 0 .7.1V8.8c-.2 0-.5-.1-.7-.1C8 8.7 5 11.7 5 15.4s3 6.6 6.6 6.6 6.6-3 6.6-6.6V9.2c1.3.9 2.8 1.5 4.4 1.5V7.5c-.9 0-2.2-.5-3-1.7l1-.2z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Auto slider
+      const slider = document.getElementById("slider");
+      const dotsContainer = document.getElementById("dots");
+      const slides = slider.children;
+      const total = slides.length;
+      let current = 0;
+
+      // Build dots
+      for (let i = 0; i < total; i++) {
+        const d = document.createElement("div");
+        d.className = "dot" + (i === 0 ? " active" : "");
+        d.addEventListener("click", () => goTo(i));
+        dotsContainer.appendChild(d);
+      }
+
+      function goTo(idx) {
+        current = idx;
+        slider.style.transform = `translateX(-${idx * 100}%)`;
+        document.querySelectorAll(".dot").forEach((d, i) => {
+          d.classList.toggle("active", i === idx);
+        });
+      }
+
+      setInterval(() => goTo((current + 1) % total), 3500);
+    </script>
+  </body>
+</html>

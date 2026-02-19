@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Game Hunter{% endblock %}
+
+{% block extra_style %}
+
+/* ── WELCOME BANNER ── */
+.welcome-banner {
+  background: #111;
+  border-bottom: 1px solid #1f1f1f;
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.welcome-avatar {
+  width: 80px; height: 80px;
+  background: #2a2a2a;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.welcome-avatar svg { width: 46px; height: 46px; fill: #888; }
+
+.welcome-text h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 2px;
+  line-height: 1.4;
+}
+
+.welcome-text h2 span { color: #e63946; }
+
+/* ── MAIN ── */
+.main { padding: 32px 40px; }
+.genre-section { margin-bottom: 40px; }
+
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #e63946;
+  letter-spacing: 2px;
+  margin-bottom: 18px;
+}
+
+/* ── GAME SCROLL ROW ── */
+.games-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.games-row::-webkit-scrollbar { height: 4px; }
+.games-row::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.game-card {
+  flex-shrink: 0;
+  width: 175px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #222;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  border-color: #444;
+}
+
+.game-cover {
+  width: 175px;
+  height: 220px;
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+}
+
+/* ── WARNA COVER PER GAME ── */
+.c-l4d2      { background: linear-gradient(160deg, #1a1000, #4d3000, #996600); }
+.c-lastofus  { background: linear-gradient(160deg, #0a1500, #1a3300, #3d6b1b); }
+.c-outlast   { background: linear-gradient(160deg, #001a00, #003300, #004d00); }
+.c-phasmo    { background: linear-gradient(160deg, #050510, #0a0a30, #151550); }
+.c-fatal     { background: linear-gradient(160deg, #10000a, #300020, #500035); }
+.c-elden     { background: linear-gradient(160deg, #1a0a00, #5a2200, #c87800); }
+.c-spiderman { background: linear-gradient(160deg, #1a0000, #8b0000, #cc0000); }
+.c-godofwar  { background: linear-gradient(160deg, #0a0000, #3d0000, #6b0000); }
+.c-sekiro    { background: linear-gradient(160deg, #000a00, #001a00, #003300); }
+.c-devil     { background: linear-gradient(160deg, #10000a, #400020, #800040); }
+.c-efootball { background: linear-gradient(160deg, #001a00, #003300, #005500); }
+.c-fifa      { background: linear-gradient(160deg, #000a1a, #001a40, #002a6b); }
+.c-nba       { background: linear-gradient(160deg, #1a0500, #4d1500, #992a00); }
+.c-f1        { background: linear-gradient(160deg, #1a0000, #4d0000, #990000); }
+.c-rocket    { background: linear-gradient(160deg, #001a1a, #003333, #005a5a); }
+.c-dota2     { background: linear-gradient(160deg, #000510, #001a40, #003580); }
+.c-lol       { background: linear-gradient(160deg, #00051a, #00104d, #001a80); }
+.c-civ       { background: linear-gradient(160deg, #1a1000, #3d2b00, #806000); }
+.c-total     { background: linear-gradient(160deg, #0a0a00, #252500, #404000); }
+.c-xcom      { background: linear-gradient(160deg, #000510, #001030, #001a50); }
+
+.game-name {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  text-align: center;
+  line-height: 1.3;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<!-- WELCOME BANNER -->
+<div class="welcome-banner">
+  <div class="welcome-avatar">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+  </div>
+  <div class="welcome-text">
+    <h2>SELAMAT DATANG <span>ILHAM</span>,<br>MAU CARI GAME APA HARI INI ?</h2>
+  </div>
+</div>
+
+<!-- MAIN KONTEN -->
+<div class="main">
+
+  <!-- HORROR -->
+  <div class="genre-section">
+    <div class="section-title">Horror Game Rekomendasi</div>
+    <div class="games-row">
+      <div class="game-card" onclick="openPopup(games['l4d2'])"><div class="game-cover c-l4d2">LEFT 4 DEAD 2</div><div class="game-name">Left 4 Dead 2</div></div>
+      <div class="game-card" onclick="openPopup(games['lastofus'])"><div class="game-cover c-lastofus">THE LAST OF US</div><div class="game-name">The Last Of Us Part 1</div></div>
+      <div class="game-card" onclick="openPopup(games['outlast'])"><div class="game-cover c-outlast">OUTLAST</div><div class="game-name">Outlast Trinity</div></div>
+      <div class="game-card" onclick="openPopup(games['phasmo'])"><div class="game-cover c-phasmo">PHASMOPHOBIA</div><div class="game-name">Phasmophobia</div></div>
+      <div class="game-card" onclick="openPopup(games['fatal'])"><div class="game-cover c-fatal">FATAL FRAME</div><div class="game-name">Fatal Frame</div></div>
+    </div>
+  </div>
+
+  <!-- ACTION -->
+  <div class="genre-section">
+    <div class="section-title">Action Game Rekomendasi</div>
+    <div class="games-row">
+      <div class="game-card" onclick="openPopup(games['elden'])"><div class="game-cover c-elden">ELDEN RING</div><div class="game-name">Elden Ring</div></div>
+      <div class="game-card" onclick="openPopup(games['spiderman'])"><div class="game-cover c-spiderman">SPIDER-MAN 2</div><div class="game-name">Marvel's Spider-Man 2</div></div>
+      <div class="game-card" onclick="openPopup(games['godofwar'])"><div class="game-cover c-godofwar">GOD OF WAR</div><div class="game-name">God of War</div></div>
+      <div class="game-card" onclick="openPopup(games['sekiro'])"><div class="game-cover c-sekiro">SEKIRO</div><div class="game-name">Sekiro: Shadows Die Twice</div></div>
+      <div class="game-card" onclick="openPopup(games['devil'])"><div class="game-cover c-devil">DMC 5</div><div class="game-name">Devil May Cry 5</div></div>
+    </div>
+  </div>
+
+  <!-- SPORTS -->
+  <div class="genre-section">
+    <div class="section-title">Sports Game Rekomendasi</div>
+    <div class="games-row">
+      <div class="game-card" onclick="openPopup(games['efootball'])"><div class="game-cover c-efootball">eFOOTBALL</div><div class="game-name">eFootball™ 2025</div></div>
+      <div class="game-card" onclick="openPopup(games['fifa'])"><div class="game-cover c-fifa">EA SPORTS FC</div><div class="game-name">EA Sports FC 25</div></div>
+      <div class="game-card" onclick="openPopup(games['nba'])"><div class="game-cover c-nba">NBA 2K25</div><div class="game-name">NBA 2K25</div></div>
+      <div class="game-card" onclick="openPopup(games['f1'])"><div class="game-cover c-f1">F1 24</div><div class="game-name">F1 24</div></div>
+      <div class="game-card" onclick="openPopup(games['rocket'])"><div class="game-cover c-rocket">ROCKET LEAGUE</div><div class="game-name">Rocket League</div></div>
+    </div>
+  </div>
+
+  <!-- STRATEGY -->
+  <div class="genre-section">
+    <div class="section-title">Strategy Game Rekomendasi</div>
+    <div class="games-row">
+      <div class="game-card" onclick="openPopup(games['dota2'])"><div class="game-cover c-dota2">DOTA 2</div><div class="game-name">Dota 2</div></div>
+      <div class="game-card" onclick="openPopup(games['lol'])"><div class="game-cover c-lol">LEAGUE OF LEGENDS</div><div class="game-name">League of Legends</div></div>
+      <div class="game-card" onclick="openPopup(games['civ'])"><div class="game-cover c-civ">CIVILIZATION VI</div><div class="game-name">Civilization VI</div></div>
+      <div class="game-card" onclick="openPopup(games['total'])"><div class="game-cover c-total">TOTAL WAR</div><div class="game-name">Total War: Warhammer III</div></div>
+      <div class="game-card" onclick="openPopup(games['xcom'])"><div class="game-cover c-xcom">XCOM 2</div><div class="game-name">XCOM 2</div></div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  const games = {
+    /* ── HORROR ── */
+    l4d2:      { title: 'Left 4 Dead 2',            coverClass: 'c-l4d2',      coverText: 'LEFT 4 DEAD 2',      developer: 'Valve',               rilis: '17 November 2009',   harga: '$9.99',        rating: '4.8 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Co-op, Zombie, Shooter, Multiplayer',          fitur: 'Multi-player, Single-player, Steam Achievements, Steam Workshop' },
+    lastofus:  { title: 'The Last Of Us Part 1',    coverClass: 'c-lastofus',  coverText: 'THE LAST OF US',     developer: 'Naughty Dog LLC',      rilis: '28 Maret 2023',      harga: '$59.99',       rating: '4.1 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Story Rich, Shooter, Survival, Horror',        fitur: 'Single-player, Steam Achievements, Steam Trading Cards, Remote Play on TV' },
+    outlast:   { title: 'Outlast Trinity',           coverClass: 'c-outlast',   coverText: 'OUTLAST',            developer: 'Red Barrels',          rilis: '25 April 2017',      harga: '$39.99',       rating: '4.6 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Horror, Survival, Stealth, Atmospheric',      fitur: 'Single-player, Steam Achievements, Steam Cloud, Family Sharing' },
+    phasmo:    { title: 'Phasmophobia',              coverClass: 'c-phasmo',    coverText: 'PHASMOPHOBIA',       developer: 'Kinetic Games',        rilis: '18 September 2020',  harga: '$13.99',       rating: '4.7 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'Horror, Co-op, Investigation, Multiplayer',   fitur: 'Multi-player, Single-player, Steam Achievements, VR Support' },
+    fatal:     { title: 'Fatal Frame',               coverClass: 'c-fatal',     coverText: 'FATAL FRAME',        developer: 'Koei Tecmo',           rilis: '27 Oktober 2021',    harga: '$49.99',       rating: '4.2 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Horror, Adventure, Atmospheric, Story Rich',  fitur: 'Single-player, Steam Achievements, Full Controller Support' },
+    /* ── ACTION ── */
+    elden:     { title: 'Elden Ring',                coverClass: 'c-elden',     coverText: 'ELDEN RING',         developer: 'FromSoftware, Inc.',   rilis: '25 Februari 2022',   harga: '$59.99',       rating: '4.8 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Action RPG, Open World, Dark Fantasy',        fitur: 'Single-player, Steam Achievements, Steam Trading Cards, Steam Cloud' },
+    spiderman: { title: "Marvel's Spider-Man 2",     coverClass: 'c-spiderman', coverText: 'SPIDER-MAN 2',       developer: 'Insomniac Games',      rilis: '30 Oktober 2024',    harga: '$69.99',       rating: '4.5 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'Action, Adventure, Superhero, Open World',    fitur: 'Single-player, Steam Achievements, Steam Cloud, Full Controller Support' },
+    godofwar:  { title: 'God of War',                coverClass: 'c-godofwar',  coverText: 'GOD OF WAR',         developer: 'Santa Monica Studio', rilis: '14 Januari 2022',    harga: '$49.99',       rating: '4.9 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Action, Adventure, Mythology, Story Rich',    fitur: 'Single-player, Steam Achievements, Steam Cloud, Full Controller Support' },
+    sekiro:    { title: 'Sekiro: Shadows Die Twice', coverClass: 'c-sekiro',    coverText: 'SEKIRO',             developer: 'FromSoftware, Inc.',   rilis: '22 Maret 2019',      harga: '$59.99',       rating: '4.7 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Action, Souls-like, Stealth, Ninja',          fitur: 'Single-player, Steam Achievements, Steam Cloud, Full Controller Support' },
+    devil:     { title: 'Devil May Cry 5',           coverClass: 'c-devil',     coverText: 'DMC 5',              developer: 'Capcom',               rilis: '8 Maret 2019',       harga: '$29.99',       rating: '4.7 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Action, Hack and Slash, Stylish, Combat',     fitur: 'Single-player, Steam Achievements, Full Controller Support, Steam Trading Cards' },
+    /* ── SPORTS ── */
+    efootball: { title: 'eFootball™ 2025',           coverClass: 'c-efootball', coverText: 'eFOOTBALL',          developer: 'KONAMI',               rilis: '30 September 2021',  harga: 'Free to Play', rating: '3.5 / 5', usia: '3+',  platform: 'Windows (PC)', genre: 'Sports, Football, Multiplayer, Simulation',   fitur: 'Multi-player, Single-player, Full Controller Support' },
+    fifa:      { title: 'EA Sports FC 25',           coverClass: 'c-fifa',      coverText: 'EA SPORTS FC',       developer: 'EA Sports',            rilis: '27 September 2024',  harga: '$69.99',       rating: '3.8 / 5', usia: '3+',  platform: 'Windows (PC)', genre: 'Sports, Football, Multiplayer, Simulation',   fitur: 'Multi-player, Single-player, Full Controller Support, Steam Achievements' },
+    nba:       { title: 'NBA 2K25',                  coverClass: 'c-nba',       coverText: 'NBA 2K25',           developer: 'Visual Concepts',      rilis: '6 September 2024',   harga: '$69.99',       rating: '3.6 / 5', usia: '3+',  platform: 'Windows (PC)', genre: 'Sports, Basketball, Simulation, Multiplayer', fitur: 'Multi-player, Single-player, Full Controller Support' },
+    f1:        { title: 'F1 24',                     coverClass: 'c-f1',        coverText: 'F1 24',              developer: 'Codemasters',          rilis: '31 Mei 2024',        harga: '$69.99',       rating: '3.7 / 5', usia: '3+',  platform: 'Windows (PC)', genre: 'Racing, Sports, Simulation, Multiplayer',     fitur: 'Multi-player, Single-player, Full Controller Support, Steam Achievements' },
+    rocket:    { title: 'Rocket League',             coverClass: 'c-rocket',    coverText: 'ROCKET LEAGUE',      developer: 'Psyonix LLC',          rilis: '7 Juli 2015',        harga: 'Free to Play', rating: '4.6 / 5', usia: '3+',  platform: 'Windows (PC)', genre: 'Sports, Racing, Multiplayer, Competitive',    fitur: 'Multi-player, Steam Achievements, Steam Trading Cards, Full Controller Support' },
+    /* ── STRATEGY ── */
+    dota2:     { title: 'Dota 2',                    coverClass: 'c-dota2',     coverText: 'DOTA 2',             developer: 'Valve',               rilis: '9 Juli 2013',        harga: 'Free to Play', rating: '4.3 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'MOBA, Strategy, Multiplayer, Competitive',    fitur: 'Multi-player, Steam Achievements, Steam Trading Cards, Steam Workshop' },
+    lol:       { title: 'League of Legends',         coverClass: 'c-lol',       coverText: 'LEAGUE OF LEGENDS',  developer: 'Riot Games',           rilis: '27 Oktober 2009',    harga: 'Free to Play', rating: '4.2 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'MOBA, Strategy, Multiplayer, Competitive',    fitur: 'Multi-player, Steam Achievements, Regular Updates' },
+    civ:       { title: 'Civilization VI',           coverClass: 'c-civ',       coverText: 'CIVILIZATION VI',    developer: 'Firaxis Games',        rilis: '21 Oktober 2016',    harga: '$59.99',       rating: '4.5 / 5', usia: '10+', platform: 'Windows (PC)', genre: 'Strategy, Turn-Based, 4X, Historical',        fitur: 'Single-player, Multi-player, Steam Achievements, Steam Workshop' },
+    total:     { title: 'Total War: Warhammer III',  coverClass: 'c-total',     coverText: 'TOTAL WAR',          developer: 'Creative Assembly',   rilis: '17 Februari 2022',   harga: '$59.99',       rating: '4.3 / 5', usia: '16+', platform: 'Windows (PC)', genre: 'Strategy, Real-Time, Turn-Based, Fantasy',    fitur: 'Single-player, Multi-player, Steam Achievements, Steam Workshop' },
+    xcom:      { title: 'XCOM 2',                    coverClass: 'c-xcom',      coverText: 'XCOM 2',             developer: 'Firaxis Games',        rilis: '5 Februari 2016',    harga: '$59.99',       rating: '4.6 / 5', usia: '16+', platform: 'Windows (PC)', genre: 'Strategy, Turn-Based, Tactical, Sci-Fi',      fitur: 'Single-player, Steam Achievements, Steam Workshop, Steam Cloud' },
+  };
+</script>
+{% endblock %}

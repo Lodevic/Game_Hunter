@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Hunter - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    /* ── BACKGROUND GAME GRID ── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
+      transform: rotate(-5deg) scale(1.2);
+      z-index: 0;
+      opacity: 0.55;
+    }
+
+    .bg-tile {
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .t1  { background: linear-gradient(135deg, #1a0000, #8b1a00, #ff4500); }
+    .t2  { background: linear-gradient(135deg, #000510, #001a40, #0055bb); }
+    .t3  { background: linear-gradient(135deg, #001a00, #003300, #1a6600); }
+    .t4  { background: linear-gradient(135deg, #1a001a, #4b0082, #8b008b); }
+    .t5  { background: linear-gradient(135deg, #1a1000, #3d2b00, #6b4900); }
+    .t6  { background: linear-gradient(135deg, #0a0a1a, #1a1a4b, #2a2a8b); }
+    .t7  { background: linear-gradient(135deg, #1a0a00, #5a2200, #c87800); }
+    .t8  { background: linear-gradient(135deg, #00001a, #00004b, #00008b); }
+    .t9  { background: linear-gradient(135deg, #0a1a00, #1a3300, #2d5a1b); }
+    .t10 { background: linear-gradient(135deg, #1a0000, #6b0000, #cc0000); }
+    .t11 { background: linear-gradient(135deg, #001a1a, #003333, #005555); }
+    .t12 { background: linear-gradient(135deg, #1a1a00, #3d3d00, #7a7a00); }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 1;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 16px 40px;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+
+    /* ── LOGIN CARD ── */
+    .login-wrapper {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 60px;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 48px 44px;
+      width: 340px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      animation: slideIn 0.5s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .login-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.85);
+      border: none;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      outline: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input::placeholder { color: #888; }
+
+    .form-group input:focus {
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(230,57,70,0.5);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: rgba(255,255,255,0.75);
+      border: none;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: 1px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-login:hover {
+      background: #e63946;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(230,57,70,0.45);
+    }
+
+    .signup-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .signup-link:hover { color: #e63946; }
+
+    .error-msg {
+      background: rgba(230,57,70,0.2);
+      border: 1px solid rgba(230,57,70,0.5);
+      color: #ff6b6b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND GAME GRID -->
+  <div class="bg-grid">
+    <div class="bg-tile t1"></div>  <div class="bg-tile t2"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t4"></div>
+    <div class="bg-tile t5"></div>  <div class="bg-tile t6"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t8"></div>
+    <div class="bg-tile t9"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t11"></div> <div class="bg-tile t12"></div>
+    <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t6"></div>
+    <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div> <div class="bg-tile t8"></div>  <div class="bg-tile t2"></div>
+    <div class="bg-tile t12"></div> <div class="bg-tile t5"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t9"></div>
+    <div class="bg-tile t6"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div>
+    <div class="bg-tile t8"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t5"></div>
+  </div>
+  <div class="bg-overlay"></div>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="/" class="logo">GAME HUNTER</a>
+  </nav>
+
+  <!-- LOGIN CARD -->
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h2>Login</h2>
+
+      <div class="error-msg" id="errorMsg">Username atau password salah!</div>
+
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <input type="text" name="username" placeholder="Username" required autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Password" required/>
+        </div>
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+
+      <a href="/register" class="signup-link">SIGN UP</a>
+    </div>
+  </div>
+
+</body>
+</html>

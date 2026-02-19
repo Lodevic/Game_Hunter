@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Hunter - Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
+      transform: rotate(-5deg) scale(1.2);
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .bg-tile { border-radius: 4px; }
+    .t1  { background: linear-gradient(135deg, #1a0000, #8b1a00, #ff4500); }
+    .t2  { background: linear-gradient(135deg, #000510, #001a40, #0055bb); }
+    .t3  { background: linear-gradient(135deg, #001a00, #003300, #1a6600); }
+    .t4  { background: linear-gradient(135deg, #1a001a, #4b0082, #8b008b); }
+    .t5  { background: linear-gradient(135deg, #1a1000, #3d2b00, #6b4900); }
+    .t6  { background: linear-gradient(135deg, #0a0a1a, #1a1a4b, #2a2a8b); }
+    .t7  { background: linear-gradient(135deg, #1a0a00, #5a2200, #c87800); }
+    .t8  { background: linear-gradient(135deg, #00001a, #00004b, #00008b); }
+    .t9  { background: linear-gradient(135deg, #0a1a00, #1a3300, #2d5a1b); }
+    .t10 { background: linear-gradient(135deg, #1a0000, #6b0000, #cc0000); }
+    .t11 { background: linear-gradient(135deg, #001a1a, #003333, #005555); }
+    .t12 { background: linear-gradient(135deg, #1a1a00, #3d3d00, #7a7a00); }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 16px 40px;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 60px;
+    }
+
+    .signup-card {
+      background: rgba(200, 200, 200, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 44px 40px;
+      width: 300px;
+      flex-shrink: 0;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      animation: slideIn 0.5s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .signup-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 16px;
+      background: rgba(255,255,255,0.82);
+      border: none;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #333;
+      outline: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input::placeholder { color: #888; }
+
+    .form-group input:focus {
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(230,57,70,0.5);
+    }
+
+    .btn-signup {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.75);
+      border: none;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: 1px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-signup:hover {
+      background: #e63946;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(230,57,70,0.45);
+    }
+
+    .login-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .login-link:hover { color: #e63946; }
+
+    .error-msg {
+      background: rgba(230,57,70,0.2);
+      border: 1px solid rgba(230,57,70,0.5);
+      color: #ff6b6b;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    .tagline {
+      position: fixed;
+      bottom: 32px;
+      left: 0; right: 0;
+      text-align: center;
+      z-index: 10;
+      animation: fadeUp 0.8s ease 0.3s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tagline p {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #4dd9ff;
+      letter-spacing: 0.5px;
+      line-height: 1.6;
+      text-shadow: 0 0 20px rgba(77,217,255,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid">
+    <div class="bg-tile t1"></div>  <div class="bg-tile t2"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t4"></div>
+    <div class="bg-tile t5"></div>  <div class="bg-tile t6"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t8"></div>
+    <div class="bg-tile t9"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t11"></div> <div class="bg-tile t12"></div>
+    <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t6"></div>
+    <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div> <div class="bg-tile t8"></div>  <div class="bg-tile t2"></div>
+    <div class="bg-tile t12"></div> <div class="bg-tile t5"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t9"></div>
+    <div class="bg-tile t6"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div>
+    <div class="bg-tile t8"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t5"></div>
+  </div>
+  <div class="bg-overlay"></div>
+
+  <nav>
+    <a href="/" class="logo">GAME HUNTER</a>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="signup-card">
+      <h2>Sign Up</h2>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form method="POST" action="/register">
+        <div class="form-group">
+          <input type="text" name="username" placeholder="Username" required autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <input type="password" name="password" placeholder="Password" required/>
+        </div>
+        <div class="form-group">
+          <input type="password" name="confirm_password" placeholder="Confirm Password" required/>
+        </div>
+        <button type="submit" class="btn-signup">Sign Up</button>
+      </form>
+
+      <a href="/login" class="login-link">Already have an account? LOGIN</a>
+    </div>
+  </div>
+
+  <div class="tagline">
+    <p>Hunter, your next adventure awaits!<br>Discover top-rated Steam games tailored just for you.</p>
+  </div>
+
+</body>
+</html>
