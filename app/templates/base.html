@@ -344,7 +344,22 @@
       text-shadow: 0 2px 8px rgba(0,0,0,0.9);
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       letter-spacing: 1px;
+      background-size: cover;
+      background-position: center;
+      background-color: #1a1a1a;
+      position: relative;
+      overflow: hidden;
     }
+
+    .popup-cover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.05) 60%);
+      z-index: 0;
+    }
+
+    .popup-cover span { position: relative; z-index: 1; }
 
     .popup-game-title {
       font-family: 'Orbitron', sans-serif;
@@ -366,6 +381,25 @@
 
     .btn-favorit:hover { background: #e63946; color: #fff; transform: translateY(-1px); }
     .btn-favorit.saved { background: #e63946; color: #fff; }
+
+    /* Tombol Steam */
+    .btn-steam {
+      margin-top: 8px; width: 100%; padding: 9px;
+      background: #1b2838;
+      border: 1.5px solid #2a475e;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem; font-weight: 700;
+      color: #c7d5e0;
+      cursor: pointer; letter-spacing: 0.5px;
+      text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .btn-steam:hover { background: #2a475e; border-color: #4a90d9; color: #fff; }
+
+    .btn-steam svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
 
     .popup-info {
       flex: 1; display: flex; flex-direction: column;
@@ -415,7 +449,7 @@
 <footer>
   <div class="footer-left">
     <div class="footer-logo"><span>© 2025</span> GAME HUNTER</div>
-    <p>Contact us<br>gamehunterz@gmail.com<br>+6281234567890</p>
+    <p>Contact us<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f99e98949c918c978d9c8b83b99e94989095d79a9694">[email&#160;protected]</a><br>+6281234567890</p>
   </div>
   <div class="footer-right">
     <p>Follow us</p>
@@ -452,16 +486,20 @@
     <button class="popup-close" onclick="closePopup()">✕</button>
     <div class="popup-body">
       <div class="popup-left">
-        <div class="popup-cover" id="popupCover"></div>
+        <div class="popup-cover" id="popupCover"><span id="popupCoverText"></span></div>
         <div class="popup-game-title" id="popupTitle"></div>
         <button class="btn-favorit" id="btnFavorit" onclick="toggleFavorit()">♥ Favorit</button>
+        <a class="btn-steam" id="btnSteam" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.52 3.73 10.17 8.84 11.54L12.53 18c.16-.61.1-1.26-.2-1.84l-1.18-2.28a3.27 3.27 0 0 0-1.42-3.7 3.27 3.27 0 0 0-4.46 1.2L3.5 9.5A8.5 8.5 0 0 1 12 3.5a8.5 8.5 0 0 1 8.5 8.5 8.5 8.5 0 0 1-8.5 8.5h-.15l-3.2 3.27A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm-1.77 15.5a2 2 0 0 1-2-2 2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 1-2 2z"/></svg>
+          Buka di Steam
+        </a>
       </div>
       <div class="popup-info" id="popupInfo"></div>
     </div>
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   /* ── LOGOUT ── */
   function showLogout() {
     document.getElementById('logoutOverlay').classList.add('show');
@@ -528,13 +566,21 @@
   function openPopup(g) {
     currentGameKey = g.key;
 
-    document.getElementById('popupCover').className = 'popup-cover ' + g.coverClass;
-    document.getElementById('popupCover').textContent = g.coverText;
+    // Cover — pakai gambar dari API kalau ada, fallback ke gradient
+    const cover = document.getElementById('popupCover');
+    cover.className = 'popup-cover ' + (g.coverClass || '');
+    if (g.image) {
+      cover.style.backgroundImage = `url('${g.image}')`;
+    } else {
+      cover.style.backgroundImage = '';
+    }
+    document.getElementById('popupCoverText').textContent = g.coverText || g.title;
     document.getElementById('popupTitle').textContent = g.title;
 
+    // Tombol favorit
     const btn = document.getElementById('btnFavorit');
     const favs = getFavs();
-    if (favs.includes(g.key)) {
+    if (favs.includes(String(g.key))) {
       btn.textContent = '♥ Tersimpan!';
       btn.classList.add('saved');
     } else {
@@ -542,16 +588,21 @@
       btn.classList.remove('saved');
     }
 
-    const tags   = g.genre.split(',').map(t => `<span class="popup-tag">${t.trim()}</span>`).join('');
-    const fiturs = g.fitur.split(',').map(f => `<span class="popup-fitur-item">${f.trim()}</span>`).join('');
+    // Tombol Steam — link ke halaman pencarian Steam
+    const steamBtn = document.getElementById('btnSteam');
+    const steamSearch = 'https://store.steampowered.com/search/?term=' + encodeURIComponent(g.title);
+    steamBtn.href = steamSearch;
+
+    const tags   = (g.genre || '-').split(',').map(t => `<span class="popup-tag">${t.trim()}</span>`).join('');
+    const fiturs = (g.fitur || '-').split(',').map(f => `<span class="popup-fitur-item">${f.trim()}</span>`).join('');
 
     document.getElementById('popupInfo').innerHTML = `
-      <div class="popup-info-row"><span class="popup-info-label">Developer</span><span class="popup-info-value">${g.developer}</span></div>
-      <div class="popup-info-row"><span class="popup-info-label">Tanggal Rilis</span><span class="popup-info-value">${g.rilis}</span></div>
-      <div class="popup-info-row"><span class="popup-info-label">Harga</span><span class="popup-info-value">${g.harga}</span></div>
-      <div class="popup-info-row"><span class="popup-info-label">Rating</span><span class="popup-info-value">${g.rating}</span></div>
-      <div class="popup-info-row"><span class="popup-info-label">Rating Usia</span><span class="popup-info-value">${g.usia}</span></div>
-      <div class="popup-info-row"><span class="popup-info-label">Platform</span><span class="popup-info-value">${g.platform}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Developer</span><span class="popup-info-value">${g.developer || '-'}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Tanggal Rilis</span><span class="popup-info-value">${g.rilis || '-'}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Harga</span><span class="popup-info-value">${g.harga || '-'}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Rating</span><span class="popup-info-value">${g.rating || '-'}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Rating Usia</span><span class="popup-info-value">${g.usia || '-'}</span></div>
+      <div class="popup-info-row"><span class="popup-info-label">Platform</span><span class="popup-info-value">${g.platform || '-'}</span></div>
       <div class="popup-divider"></div>
       <div class="popup-tag-title">Genre / Tag</div>
       <div class="popup-tags">${tags}</div>
@@ -568,7 +619,6 @@
     if (e.key === 'Escape') { closePopup(); hideLogout(); }
   });
 
-  document.addEventListener('DOMContentLoaded', markFavorites);
 </script>
 
 {% block extra_script %}{% endblock %}

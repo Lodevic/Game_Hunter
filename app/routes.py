@@ -4,18 +4,15 @@ from app.model.user import User
 from sqlalchemy import text
 import requests
 
-# ── RAWG API KEY — daftar gratis di https://rawg.io/apidocs ──
-RAWG_API_KEY = 'MASUKKAN_API_KEY_KAMU_DISINI'
+RAWG_API_KEY = '8d72c45a17f746309288d44c79608066'
 
-# ── MAPPING genre keyword → label di dashboard ──
 GENRE_MAP = [
-    {'label': 'Horror Game Rekomendasi',   'keywords': ['Horror', 'Survival Horror']},
-    {'label': 'Action Game Rekomendasi',   'keywords': ['Action', 'Action RPG', 'Hack and Slash']},
+    {'label': 'Horror Game Rekomendasi',   'keywords': ['Horror', 'Survival']},
+    {'label': 'Action Game Rekomendasi',   'keywords': ['Action', 'FPS', 'Tactical']},
     {'label': 'Sports Game Rekomendasi',   'keywords': ['Sports', 'Football', 'Racing', 'Basketball']},
-    {'label': 'Strategy Game Rekomendasi', 'keywords': ['Strategy', 'MOBA', 'Turn-Based', '4X']},
+    {'label': 'Strategy Game Rekomendasi', 'keywords': ['Strategy', 'MOBA', 'Turn-Based', 'RPG']},
 ]
 
-# ── DECORATOR: wajib login ──
 def login_required(f):
     from functools import wraps
     @wraps(f)
@@ -26,54 +23,128 @@ def login_required(f):
     return decorated
 
 
-# ── AMBIL GAMBAR DARI RAWG API ──
-def get_game_image(game_name):
+# ════════════════════════════════════════════
+#  CACHE SYSTEM
+#  - Kalau image_url di DB sudah ada → pakai langsung (cepat!)
+#  - Kalau image_url kosong → fetch dari RAWG API → simpan ke DB
+# ════════════════════════════════════════════
+
+def fetch_from_rawg(game_name):
+    """Ambil gambar dari RAWG API."""
     try:
         res = requests.get(
             'https://api.rawg.io/api/games',
-            params={'key': RAWG_API_KEY, 'search': game_name, 'page_size': 1},
+            params={
+                'key': RAWG_API_KEY,
+                'search': game_name,
+                'page_size': 1,
+                'search_precise': True
+            },
             timeout=5
         )
-        data = res.json()
-        if data.get('results'):
-            return data['results'][0].get('background_image', None)
+        if res.status_code == 200:
+            results = res.json().get('results', [])
+            if results:
+                return results[0].get('background_image') or ''
+    except Exception as e:
+        print(f"[RAWG ERROR] {game_name}: {e}")
+    return ''
+
+
+def get_game_image_cached(game_id, game_name, cached_url):
+    """
+    Ambil gambar dengan cache:
+    - Kalau cached_url sudah ada di DB → return langsung
+    - Kalau kosong → fetch RAWG API → simpan ke DB → return
+    """
+    if cached_url:
+        return cached_url  # ← Sudah ada di cache, langsung pakai!
+
+    # Belum ada cache → fetch dari API
+    image_url = fetch_from_rawg(game_name)
+
+    # Simpan ke DB supaya next time tidak perlu fetch lagi
+    try:
+        db.session.execute(
+            text("UPDATE best_selling_games SET image_url = :url WHERE id = :id"),
+            {'url': image_url, 'id': game_id}
+        )
+        db.session.commit()
+        print(f"[CACHE SAVED] {game_name}")
+    except Exception as e:
+        print(f"[CACHE ERROR] {e}")
+
+    return image_url
+
+
+def format_game_row(row):
+    """Convert DB row ke dict game dengan cache system."""
+    try:
+        harga = f"${float(row.price):.2f}" if row.price and float(row.price) > 0 else 'Free to Play'
     except Exception:
-        pass
-    return None
+        harga = 'Free to Play'
+    try:
+        rating_str = f"{float(row.rating):.1f} / 5" if row.rating else '-'
+    except Exception:
+        rating_str = '-'
+
+    # Pakai cache — kalau sudah ada langsung pakai, kalau belum fetch API
+    image_url = get_game_image_cached(row.id, row.game_name, row.image_url)
+
+    return {
+        'id':        row.id,
+        'name':      row.game_name or '-',
+        'developer': row.developer or '-',
+        'release':   str(row.release_date) if row.release_date else '-',
+        'price':     harga,
+        'rating':    rating_str,
+        'usia':      row.age_restriction or '-',
+        'platform':  row.supported_os or 'Windows (PC)',
+        'genre':     row.user_defined_tags or '-',
+        'fitur':     row.other_features or '-',
+        'image':     image_url,
+    }
 
 
-# ── AMBIL GAME PER GENRE DARI DB ──
-def get_games_by_genre(keywords, limit=5):
-    conditions = ' OR '.join([f"user_defined_tags LIKE :kw{i}" for i, _ in enumerate(keywords)])
-    params     = {f'kw{i}': f'%{kw}%' for i, kw in enumerate(keywords)}
-
+def get_popular_games(limit=20):
+    """Ambil game paling populer berdasarkan rating tertinggi."""
     query = text(f"""
         SELECT id, game_name, developer, release_date, price, rating,
-               age_restriction, supported_os, user_defined_tags, other_features
+               age_restriction, supported_os, user_defined_tags, other_features,
+               image_url
+        FROM best_selling_games
+        WHERE id BETWEEN 1 AND 20
+        ORDER BY id ASC
+    """)
+    try:
+        rows = db.session.execute(query).fetchall()
+        return [format_game_row(r) for r in rows]
+    except Exception as e:
+        print(f"[DB ERROR popular] {e}")
+        return []
+
+
+def get_games_by_genre(keywords, limit=20):
+    """Query best_selling_games berdasarkan keyword di user_defined_tags."""
+    if not keywords:
+        return []
+    conditions = ' OR '.join([f"user_defined_tags LIKE :kw{i}" for i, _ in enumerate(keywords)])
+    params     = {f'kw{i}': f'%{kw}%' for i, kw in enumerate(keywords)}
+    query = text(f"""
+        SELECT id, game_name, developer, release_date, price, rating,
+               age_restriction, supported_os, user_defined_tags, other_features,
+               image_url
         FROM best_selling_games
         WHERE {conditions}
         ORDER BY rating DESC
         LIMIT {limit}
     """)
-
-    rows  = db.session.execute(query, params).fetchall()
-    games = []
-    for row in rows:
-        image_url = get_game_image(row.game_name)
-        games.append({
-            'id':        row.id,
-            'name':      row.game_name,
-            'developer': row.developer or '-',
-            'release':   str(row.release_date) if row.release_date else '-',
-            'price':     f"${row.price:.2f}" if row.price and row.price > 0 else 'Free to Play',
-            'rating':    f"{row.rating:.1f} / 5" if row.rating else '-',
-            'usia':      row.age_restriction or '-',
-            'platform':  row.supported_os or 'Windows (PC)',
-            'genre':     row.user_defined_tags or '-',
-            'fitur':     row.other_features or '-',
-            'image':     image_url,
-        })
-    return games
+    try:
+        rows = db.session.execute(query, params).fetchall()
+        return [format_game_row(r) for r in rows]
+    except Exception as e:
+        print(f"[DB ERROR genre] {e}")
+        return []
 
 
 # ════════════════════════════
@@ -148,16 +219,17 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Ambil game per genre dari DB + gambar dari RAWG API
+    popular_games  = get_popular_games(limit=20)
     genre_sections = []
     for g in GENRE_MAP:
-        games = get_games_by_genre(g['keywords'], limit=5)
+        games = get_games_by_genre(g['keywords'], limit=20)
         if games:
             genre_sections.append({'label': g['label'], 'games': games})
 
     return render_template('dashboard.html',
                            active_page='dashboard',
                            user_name=session.get('user_name', 'User'),
+                           popular_games=popular_games,
                            genre_sections=genre_sections)
 
 
