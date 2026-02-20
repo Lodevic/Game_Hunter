@@ -172,6 +172,7 @@
 
     .signup-link:hover { color: #e63946; }
 
+    /* ── ERROR ── */
     .error-msg {
       background: rgba(230,57,70,0.2);
       border: 1px solid rgba(230,57,70,0.5);
@@ -181,10 +182,7 @@
       font-size: 0.9rem;
       font-weight: 600;
       margin-bottom: 16px;
-      display: none;
     }
-
-    .error-msg.show { display: block; }
   </style>
 </head>
 <body>
@@ -212,11 +210,16 @@
     <div class="login-card">
       <h2>Login</h2>
 
-      <div class="error-msg" id="errorMsg">Username atau password salah!</div>
+      <!-- Error dari Flask -->
+      {% if error %}
+      <div class="error-msg">⚠ {{ error }}</div>
+      {% endif %}
 
       <form method="POST" action="/login">
         <div class="form-group">
-          <input type="text" name="username" placeholder="Username" required autocomplete="off"/>
+          <!-- name="email" agar cocok dengan routes.py -->
+          <input type="email" name="email" placeholder="Email" required autocomplete="off"
+                 value="{{ request.form.get('email', '') }}"/>
         </div>
         <div class="form-group">
           <input type="password" name="password" placeholder="Password" required/>

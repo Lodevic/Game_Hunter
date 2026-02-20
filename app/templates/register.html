@@ -166,6 +166,7 @@
 
     .login-link:hover { color: #e63946; }
 
+    /* ── ERROR ── */
     .error-msg {
       background: rgba(230,57,70,0.2);
       border: 1px solid rgba(230,57,70,0.5);
@@ -175,10 +176,7 @@
       font-size: 0.88rem;
       font-weight: 600;
       margin-bottom: 14px;
-      display: none;
     }
-
-    .error-msg.show { display: block; }
 
     .tagline {
       position: fixed;
@@ -226,11 +224,21 @@
     <div class="signup-card">
       <h2>Sign Up</h2>
 
-      <div class="error-msg" id="errorMsg"></div>
+      <!-- Error dari Flask -->
+      {% if error %}
+      <div class="error-msg">⚠ {{ error }}</div>
+      {% endif %}
 
       <form method="POST" action="/register">
         <div class="form-group">
-          <input type="text" name="username" placeholder="Username" required autocomplete="off"/>
+          <!-- name="name" untuk kolom name di database -->
+          <input type="text" name="name" placeholder="Username" required autocomplete="off"
+                 value="{{ request.form.get('name', '') }}"/>
+        </div>
+        <div class="form-group">
+          <!-- name="email" untuk kolom email di database -->
+          <input type="email" name="email" placeholder="Email" required
+                 value="{{ request.form.get('email', '') }}"/>
         </div>
         <div class="form-group">
           <input type="password" name="password" placeholder="Password" required/>

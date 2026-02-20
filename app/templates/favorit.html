@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}Favorit Game - Game Hunter{% endblock %}
+
+{% block extra_style %}
+
+.main { padding: 32px 40px; }
+
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #e63946;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+/* ── GAME GRID ── */
+.fav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.game-card {
+  width: 190px;
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: visible;
+  cursor: pointer;
+  border: 1px solid #333;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  border-color: #555;
+}
+
+.game-cover {
+  width: 100%;
+  height: 230px;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  overflow: hidden;
+}
+
+/* Tombol hati pojok kanan atas card */
+.fav-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #e63946;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 10;
+  border: none;
+}
+
+.fav-remove:hover {
+  background: #e63946;
+  color: #fff;
+  transform: scale(1.15);
+}
+
+.game-name {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── COVER COLORS ── */
+.c-l4d2      { background: linear-gradient(160deg, #1a1000, #4d3000, #996600); }
+.c-lastofus  { background: linear-gradient(160deg, #0a1500, #1a3300, #3d6b1b); }
+.c-outlast   { background: linear-gradient(160deg, #001a00, #003300, #004d00); }
+.c-phasmo    { background: linear-gradient(160deg, #050510, #0a0a30, #151550); }
+.c-fatal     { background: linear-gradient(160deg, #10000a, #300020, #500035); }
+.c-elden     { background: linear-gradient(160deg, #1a0a00, #5a2200, #c87800); }
+.c-spiderman { background: linear-gradient(160deg, #1a0000, #8b0000, #cc0000); }
+.c-godofwar  { background: linear-gradient(160deg, #0a0000, #3d0000, #6b0000); }
+.c-sekiro    { background: linear-gradient(160deg, #000a00, #001a00, #003300); }
+.c-devil     { background: linear-gradient(160deg, #10000a, #400020, #800040); }
+.c-efootball { background: linear-gradient(160deg, #001a00, #003300, #005500); }
+.c-fifa      { background: linear-gradient(160deg, #000a1a, #001a40, #002a6b); }
+.c-nba       { background: linear-gradient(160deg, #1a0500, #4d1500, #992a00); }
+.c-f1        { background: linear-gradient(160deg, #1a0000, #4d0000, #990000); }
+.c-rocket    { background: linear-gradient(160deg, #001a1a, #003333, #005a5a); }
+.c-dota2     { background: linear-gradient(160deg, #000510, #001a40, #003580); }
+.c-lol       { background: linear-gradient(160deg, #00051a, #00104d, #001a80); }
+.c-civ       { background: linear-gradient(160deg, #1a1000, #3d2b00, #806000); }
+.c-total     { background: linear-gradient(160deg, #0a0a00, #252500, #404000); }
+.c-xcom      { background: linear-gradient(160deg, #000510, #001030, #001a50); }
+.c-pubg      { background: linear-gradient(160deg, #1a1000, #3d2b00, #7a5500); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; color: #333; }
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  line-height: 1.6;
+}
+
+.empty-state a {
+  margin-top: 20px;
+  padding: 10px 28px;
+  background: #e63946;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+  display: inline-block;
+}
+
+.empty-state a:hover { background: #c0303b; }
+
+{% endblock %}
+
+{% block content %}
+
+<div class="main">
+  <div class="section-title">Favorit Game</div>
+
+  <div class="fav-grid" id="favGrid"></div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">♡</div>
+    <p>Kamu belum punya game favorit.<br>Klik tombol <strong>♥ Favorit</strong> di popup game untuk menambahkan!</p>
+    <a href="/dashboard">Cari Game</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  const allGames = {
+    l4d2:      { key:'l4d2',      title:'Left 4 Dead 2',            coverClass:'c-l4d2',      coverText:'LEFT 4 DEAD 2',     developer:'Valve',               rilis:'17 November 2009',  harga:'$9.99',        rating:'4.8 / 5', usia:'17+', platform:'Windows (PC)', genre:'Co-op, Zombie, Shooter, Multiplayer, Horror', fitur:'Multi-player, Single-player, Steam Achievements, Steam Workshop' },
+    lastofus:  { key:'lastofus',  title:'The Last Of Us Part 1',    coverClass:'c-lastofus',  coverText:'THE LAST OF US',    developer:'Naughty Dog LLC',     rilis:'28 Maret 2023',     harga:'$59.99',       rating:'4.1 / 5', usia:'17+', platform:'Windows (PC)', genre:'Story Rich, Shooter, Survival, Horror',       fitur:'Single-player, Steam Achievements, Steam Trading Cards' },
+    outlast:   { key:'outlast',   title:'Outlast Trinity',           coverClass:'c-outlast',   coverText:'OUTLAST',           developer:'Red Barrels',         rilis:'25 April 2017',     harga:'$39.99',       rating:'4.6 / 5', usia:'17+', platform:'Windows (PC)', genre:'Horror, Survival, Stealth, Atmospheric',     fitur:'Single-player, Steam Achievements, Steam Cloud' },
+    phasmo:    { key:'phasmo',    title:'Phasmophobia',              coverClass:'c-phasmo',    coverText:'PHASMOPHOBIA',      developer:'Kinetic Games',       rilis:'18 September 2020', harga:'$13.99',       rating:'4.7 / 5', usia:'13+', platform:'Windows (PC)', genre:'Horror, Co-op, Investigation, Multiplayer',  fitur:'Multi-player, Single-player, Steam Achievements, VR Support' },
+    fatal:     { key:'fatal',     title:'Fatal Frame',               coverClass:'c-fatal',     coverText:'FATAL FRAME',       developer:'Koei Tecmo',          rilis:'27 Oktober 2021',   harga:'$49.99',       rating:'4.2 / 5', usia:'17+', platform:'Windows (PC)', genre:'Horror, Adventure, Atmospheric, Story Rich', fitur:'Single-player, Steam Achievements, Full Controller Support' },
+    elden:     { key:'elden',     title:'Elden Ring',                coverClass:'c-elden',     coverText:'ELDEN RING',        developer:'FromSoftware, Inc.',  rilis:'25 Februari 2022',  harga:'$59.99',       rating:'4.8 / 5', usia:'17+', platform:'Windows (PC)', genre:'Action RPG, Open World, Dark Fantasy',       fitur:'Single-player, Steam Achievements, Steam Trading Cards, Steam Cloud' },
+    spiderman: { key:'spiderman', title:"Marvel's Spider-Man 2",     coverClass:'c-spiderman', coverText:'SPIDER-MAN 2',      developer:'Insomniac Games',     rilis:'30 Oktober 2024',   harga:'$69.99',       rating:'4.5 / 5', usia:'13+', platform:'Windows (PC)', genre:'Action, Adventure, Superhero, Open World',   fitur:'Single-player, Steam Achievements, Full Controller Support' },
+    godofwar:  { key:'godofwar',  title:'God of War',                coverClass:'c-godofwar',  coverText:'GOD OF WAR',        developer:'Santa Monica Studio', rilis:'14 Januari 2022',   harga:'$49.99',       rating:'4.9 / 5', usia:'17+', platform:'Windows (PC)', genre:'Action, Adventure, Mythology, Story Rich',   fitur:'Single-player, Steam Achievements, Full Controller Support' },
+    sekiro:    { key:'sekiro',    title:'Sekiro: Shadows Die Twice', coverClass:'c-sekiro',    coverText:'SEKIRO',            developer:'FromSoftware, Inc.',  rilis:'22 Maret 2019',     harga:'$59.99',       rating:'4.7 / 5', usia:'17+', platform:'Windows (PC)', genre:'Action, Souls-like, Stealth, Ninja',         fitur:'Single-player, Steam Achievements, Full Controller Support' },
+    devil:     { key:'devil',     title:'Devil May Cry 5',           coverClass:'c-devil',     coverText:'DMC 5',             developer:'Capcom',              rilis:'8 Maret 2019',      harga:'$29.99',       rating:'4.7 / 5', usia:'17+', platform:'Windows (PC)', genre:'Action, Hack and Slash, Stylish, Combat',    fitur:'Single-player, Steam Achievements, Full Controller Support' },
+    efootball: { key:'efootball', title:'eFootball™ 2025',           coverClass:'c-efootball', coverText:'eFOOTBALL',         developer:'KONAMI',              rilis:'30 September 2021', harga:'Free to Play', rating:'3.5 / 5', usia:'3+',  platform:'Windows (PC)', genre:'Sports, Football, Multiplayer, Simulation',  fitur:'Multi-player, Single-player, Full Controller Support' },
+    fifa:      { key:'fifa',      title:'EA Sports FC 25',           coverClass:'c-fifa',      coverText:'EA SPORTS FC',      developer:'EA Sports',           rilis:'27 September 2024', harga:'$69.99',       rating:'3.8 / 5', usia:'3+',  platform:'Windows (PC)', genre:'Sports, Football, Multiplayer, Simulation',  fitur:'Multi-player, Single-player, Full Controller Support' },
+    nba:       { key:'nba',       title:'NBA 2K25',                  coverClass:'c-nba',       coverText:'NBA 2K25',          developer:'Visual Concepts',     rilis:'6 September 2024',  harga:'$69.99',       rating:'3.6 / 5', usia:'3+',  platform:'Windows (PC)', genre:'Sports, Basketball, Simulation, Multiplayer',fitur:'Multi-player, Single-player, Full Controller Support' },
+    f1:        { key:'f1',        title:'F1 24',                     coverClass:'c-f1',        coverText:'F1 24',             developer:'Codemasters',         rilis:'31 Mei 2024',       harga:'$69.99',       rating:'3.7 / 5', usia:'3+',  platform:'Windows (PC)', genre:'Racing, Sports, Simulation, Multiplayer',    fitur:'Multi-player, Single-player, Full Controller Support' },
+    rocket:    { key:'rocket',    title:'Rocket League',             coverClass:'c-rocket',    coverText:'ROCKET LEAGUE',     developer:'Psyonix LLC',         rilis:'7 Juli 2015',       harga:'Free to Play', rating:'4.6 / 5', usia:'3+',  platform:'Windows (PC)', genre:'Sports, Racing, Multiplayer, Competitive',   fitur:'Multi-player, Steam Achievements, Full Controller Support' },
+    dota2:     { key:'dota2',     title:'Dota 2',                    coverClass:'c-dota2',     coverText:'DOTA 2',            developer:'Valve',               rilis:'9 Juli 2013',       harga:'Free to Play', rating:'4.3 / 5', usia:'13+', platform:'Windows (PC)', genre:'MOBA, Strategy, Multiplayer, Competitive',   fitur:'Multi-player, Steam Achievements, Steam Workshop' },
+    lol:       { key:'lol',       title:'League of Legends',         coverClass:'c-lol',       coverText:'LEAGUE OF LEGENDS', developer:'Riot Games',          rilis:'27 Oktober 2009',   harga:'Free to Play', rating:'4.2 / 5', usia:'13+', platform:'Windows (PC)', genre:'MOBA, Strategy, Multiplayer, Competitive',   fitur:'Multi-player, Steam Achievements, Regular Updates' },
+    civ:       { key:'civ',       title:'Civilization VI',           coverClass:'c-civ',       coverText:'CIVILIZATION VI',   developer:'Firaxis Games',       rilis:'21 Oktober 2016',   harga:'$59.99',       rating:'4.5 / 5', usia:'10+', platform:'Windows (PC)', genre:'Strategy, Turn-Based, 4X, Historical',       fitur:'Single-player, Multi-player, Steam Achievements' },
+    total:     { key:'total',     title:'Total War: Warhammer III',  coverClass:'c-total',     coverText:'TOTAL WAR',         developer:'Creative Assembly',  rilis:'17 Februari 2022',  harga:'$59.99',       rating:'4.3 / 5', usia:'16+', platform:'Windows (PC)', genre:'Strategy, Real-Time, Turn-Based, Fantasy',   fitur:'Single-player, Multi-player, Steam Achievements' },
+    xcom:      { key:'xcom',      title:'XCOM 2',                    coverClass:'c-xcom',      coverText:'XCOM 2',            developer:'Firaxis Games',       rilis:'5 Februari 2016',   harga:'$59.99',       rating:'4.6 / 5', usia:'16+', platform:'Windows (PC)', genre:'Strategy, Turn-Based, Tactical, Sci-Fi',     fitur:'Single-player, Steam Achievements, Steam Workshop' },
+    pubg:      { key:'pubg',      title:'PUBG Battlegrounds',        coverClass:'c-pubg',      coverText:'PUBG',              developer:'KRAFTON, Inc.',       rilis:'21 Desember 2017',  harga:'Free to Play', rating:'3.9 / 5', usia:'17+', platform:'Windows (PC)', genre:'Battle Royale, Shooter, Survival, Multiplayer',fitur:'Multi-player, Steam Achievements, Full Controller Support' },
+  };
+
+  function getFavs() {
+    return JSON.parse(localStorage.getItem('gamehunter_favorites') || '[]');
+  }
+
+  function removeFavorite(key) {
+    let favs = getFavs().filter(k => k !== key);
+    localStorage.setItem('gamehunter_favorites', JSON.stringify(favs));
+    renderFavorites();
+  }
+
+  function renderFavorites() {
+    const favs = getFavs();
+    const grid = document.getElementById('favGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (favs.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'flex';
+      return;
+    }
+
+    empty.style.display = 'none';
+    grid.innerHTML = favs.map(key => {
+      const g = allGames[key];
+      if (!g) return '';
+      return `
+        <div class="game-card" onclick="openPopup(allGames['${key}'])">
+          <div class="game-cover ${g.coverClass}">${g.coverText}</div>
+          <button class="fav-remove" onclick="event.stopPropagation(); removeFavorite('${key}')" title="Hapus dari Favorit">♥</button>
+          <div class="game-name">${g.title}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderFavorites();
+</script>
+{% endblock %}

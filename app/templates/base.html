@@ -60,8 +60,9 @@
     .nav-links a:hover { color: #fff; }
     .nav-links a.active { color: #e63946; }
 
-    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
 
+    /* Avatar */
     .avatar-icon {
       width: 36px; height: 36px;
       background: #2a2a2a;
@@ -69,10 +70,139 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       transition: background 0.2s;
+      text-decoration: none;
     }
 
     .avatar-icon:hover { background: #3a3a3a; }
     .avatar-icon svg { width: 20px; height: 20px; fill: #aaa; }
+
+    /* Tombol Exit */
+    .btn-exit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      background: transparent;
+      border: 1.5px solid #333;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #888;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-exit:hover {
+      background: #e63946;
+      border-color: #e63946;
+      color: #fff;
+    }
+
+    .btn-exit svg {
+      width: 15px; height: 15px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── KONFIRMASI LOGOUT ── */
+    .logout-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      backdrop-filter: blur(4px);
+    }
+
+    .logout-overlay.show { opacity: 1; pointer-events: all; }
+
+    .logout-box {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 36px 40px;
+      width: 360px;
+      max-width: 90vw;
+      text-align: center;
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .logout-overlay.show .logout-box { transform: scale(1); }
+
+    .logout-box::before {
+      content: '';
+      display: block;
+      width: 56px; height: 56px;
+      background: rgba(230,57,70,0.12);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+
+    .logout-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      display: block;
+      margin-top: -56px;
+      line-height: 56px;
+    }
+
+    .logout-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .logout-desc {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 600;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .logout-actions { display: flex; gap: 12px; justify-content: center; }
+
+    .btn-cancel {
+      padding: 10px 24px;
+      background: transparent;
+      border: 1.5px solid #333;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #888;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-cancel:hover { border-color: #555; color: #fff; }
+
+    .btn-confirm-exit {
+      padding: 10px 24px;
+      background: #e63946;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-confirm-exit:hover { background: #c0303b; }
 
     .content { flex: 1; }
 
@@ -116,11 +246,22 @@
     .social-btn:hover { background: #e63946; }
     .social-btn svg { width: 17px; height: 17px; fill: #f0f0f0; }
 
-    /* ══════════════════════════════════
-       GLOBAL POPUP — dark gaming theme
-       Cukup tulis sekali di sini,
-       semua halaman langsung bisa pakai
-    ══════════════════════════════════ */
+    /* ── TANDA ♥ DI CARD FAVORIT ── */
+    .fav-badge {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(0,0,0,0.65);
+      color: #e63946;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    /* ── GLOBAL POPUP ── */
     .popup-overlay {
       position: fixed;
       inset: 0;
@@ -183,11 +324,7 @@
 
     .popup-close:hover { background: #e63946; color: #fff; border-color: #e63946; }
 
-    .popup-body {
-      display: flex;
-      gap: 24px;
-      padding: 28px;
-    }
+    .popup-body { display: flex; gap: 24px; padding: 28px; }
 
     .popup-left {
       display: flex;
@@ -198,15 +335,12 @@
     }
 
     .popup-cover {
-      width: 160px;
-      height: 210px;
+      width: 160px; height: 210px;
       border-radius: 10px;
-      display: flex;
-      align-items: flex-end;
+      display: flex; align-items: flex-end;
       padding: 10px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.6rem;
-      font-weight: 900;
+      font-size: 0.6rem; font-weight: 900;
       text-shadow: 0 2px 8px rgba(0,0,0,0.9);
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       letter-spacing: 1px;
@@ -214,39 +348,28 @@
 
     .popup-game-title {
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 900;
-      color: #fff;
-      text-align: center;
-      margin-top: 14px;
-      line-height: 1.4;
-      letter-spacing: 1px;
+      font-size: 0.85rem; font-weight: 900;
+      color: #fff; text-align: center;
+      margin-top: 14px; line-height: 1.4; letter-spacing: 1px;
     }
 
     .btn-favorit {
-      margin-top: 14px;
-      width: 100%;
-      padding: 10px;
+      margin-top: 14px; width: 100%; padding: 10px;
       background: transparent;
       border: 1.5px solid #e63946;
       border-radius: 8px;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #e63946;
-      cursor: pointer;
-      letter-spacing: 1px;
+      font-size: 0.95rem; font-weight: 700;
+      color: #e63946; cursor: pointer; letter-spacing: 1px;
       transition: background 0.2s, color 0.2s, transform 0.2s;
     }
 
     .btn-favorit:hover { background: #e63946; color: #fff; transform: translateY(-1px); }
+    .btn-favorit.saved { background: #e63946; color: #fff; }
 
     .popup-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding-top: 4px;
+      flex: 1; display: flex; flex-direction: column;
+      gap: 6px; padding-top: 4px;
     }
 
     .popup-info-row { display: flex; gap: 8px; font-size: 0.9rem; line-height: 1.5; }
@@ -273,9 +396,15 @@
     <li><a href="/favorit" class="{{ 'active' if active_page == 'favorit' }}">Favorit Game</a></li>
   </ul>
   <div class="nav-right">
-    <div class="avatar-icon">
+    <!-- Avatar → ke halaman profil -->
+    <a href="/profile" class="avatar-icon" title="Profil Saya">
       <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-    </div>
+    </a>
+    <!-- Tombol Exit -->
+    <button class="btn-exit" onclick="showLogout()">
+      <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Keluar
+    </button>
   </div>
 </nav>
 
@@ -304,7 +433,20 @@
   </div>
 </footer>
 
-<!-- ══ GLOBAL POPUP — tinggal panggil openPopup(games['key']) dari halaman manapun ══ -->
+<!-- KONFIRMASI LOGOUT -->
+<div class="logout-overlay" id="logoutOverlay" onclick="closeLogout(event)">
+  <div class="logout-box">
+    <span class="logout-icon">🚪</span>
+    <div class="logout-title">KELUAR?</div>
+    <p class="logout-desc">Kamu yakin ingin keluar dari<br>Game Hunter?</p>
+    <div class="logout-actions">
+      <button class="btn-cancel" onclick="hideLogout()">Batal</button>
+      <button class="btn-confirm-exit" onclick="doLogout()">Ya, Keluar</button>
+    </div>
+  </div>
+</div>
+
+<!-- GLOBAL POPUP -->
 <div class="popup-overlay" id="popupOverlay" onclick="closeOnOverlay(event)">
   <div class="popup">
     <button class="popup-close" onclick="closePopup()">✕</button>
@@ -312,7 +454,7 @@
       <div class="popup-left">
         <div class="popup-cover" id="popupCover"></div>
         <div class="popup-game-title" id="popupTitle"></div>
-        <button class="btn-favorit">♥ Favorit</button>
+        <button class="btn-favorit" id="btnFavorit" onclick="toggleFavorit()">♥ Favorit</button>
       </div>
       <div class="popup-info" id="popupInfo"></div>
     </div>
@@ -320,12 +462,87 @@
 </div>
 
 <script>
+  /* ── LOGOUT ── */
+  function showLogout() {
+    document.getElementById('logoutOverlay').classList.add('show');
+  }
+
+  function hideLogout() {
+    document.getElementById('logoutOverlay').classList.remove('show');
+  }
+
+  function closeLogout(e) {
+    if (e.target === document.getElementById('logoutOverlay')) hideLogout();
+  }
+
+  function doLogout() {
+    window.location.href = '/login';
+  }
+
+  /* ── FAVORIT ── */
+  let currentGameKey = null;
+
+  function getFavs() {
+    return JSON.parse(localStorage.getItem('gamehunter_favorites') || '[]');
+  }
+
+  function saveFavs(favs) {
+    localStorage.setItem('gamehunter_favorites', JSON.stringify(favs));
+  }
+
+  function toggleFavorit() {
+    if (!currentGameKey) return;
+    let favs = getFavs();
+    const btn = document.getElementById('btnFavorit');
+    if (favs.includes(currentGameKey)) {
+      favs = favs.filter(k => k !== currentGameKey);
+      saveFavs(favs);
+      btn.textContent = '♥ Favorit';
+      btn.classList.remove('saved');
+    } else {
+      favs.push(currentGameKey);
+      saveFavs(favs);
+      btn.textContent = '♥ Tersimpan!';
+      btn.classList.add('saved');
+    }
+    markFavorites();
+  }
+
+  function markFavorites() {
+    const favs = getFavs();
+    document.querySelectorAll('.fav-badge').forEach(el => el.remove());
+    document.querySelectorAll('.game-card').forEach(card => {
+      const onclick = card.getAttribute('onclick') || '';
+      const match = onclick.match(/\['(\w+)'\]/);
+      if (match && favs.includes(match[1])) {
+        const badge = document.createElement('div');
+        badge.className = 'fav-badge';
+        badge.textContent = '♥';
+        card.style.position = 'relative';
+        card.appendChild(badge);
+      }
+    });
+  }
+
+  /* ── POPUP ── */
   function openPopup(g) {
+    currentGameKey = g.key;
+
     document.getElementById('popupCover').className = 'popup-cover ' + g.coverClass;
     document.getElementById('popupCover').textContent = g.coverText;
     document.getElementById('popupTitle').textContent = g.title;
 
-    const tags = g.genre.split(',').map(t => `<span class="popup-tag">${t.trim()}</span>`).join('');
+    const btn = document.getElementById('btnFavorit');
+    const favs = getFavs();
+    if (favs.includes(g.key)) {
+      btn.textContent = '♥ Tersimpan!';
+      btn.classList.add('saved');
+    } else {
+      btn.textContent = '♥ Favorit';
+      btn.classList.remove('saved');
+    }
+
+    const tags   = g.genre.split(',').map(t => `<span class="popup-tag">${t.trim()}</span>`).join('');
     const fiturs = g.fitur.split(',').map(f => `<span class="popup-fitur-item">${f.trim()}</span>`).join('');
 
     document.getElementById('popupInfo').innerHTML = `
@@ -345,9 +562,13 @@
     document.getElementById('popupOverlay').classList.add('show');
   }
 
-  function closePopup() { document.getElementById('popupOverlay').classList.remove('show'); }
+  function closePopup()    { document.getElementById('popupOverlay').classList.remove('show'); }
   function closeOnOverlay(e) { if (e.target === document.getElementById('popupOverlay')) closePopup(); }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closePopup(); hideLogout(); }
+  });
+
+  document.addEventListener('DOMContentLoaded', markFavorites);
 </script>
 
 {% block extra_script %}{% endblock %}
