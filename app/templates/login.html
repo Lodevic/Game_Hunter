@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Rajdhani', sans-serif;
       min-height: 100vh;
@@ -18,53 +17,56 @@
       background: #0a0a0a;
     }
 
-    /* ── BACKGROUND GAME GRID ── */
-    .bg-grid {
+    .bg-wrap {
       position: fixed;
       inset: 0;
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 4px;
-      transform: rotate(-5deg) scale(1.2);
       z-index: 0;
-      opacity: 0.55;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transform: rotate(-5deg) scale(1.25);
+      opacity: 0.6;
+    }
+    .bg-row {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+      width: 200%;
+    }
+    .bg-row.right { animation: slideRight 35s linear infinite; }
+    .bg-row.left  { animation: slideLeft  35s linear infinite; }
+
+    @keyframes slideRight {
+      0%   { transform: translateX(-50%); }
+      100% { transform: translateX(0%); }
+    }
+    @keyframes slideLeft {
+      0%   { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
     }
 
     .bg-tile {
-      border-radius: 4px;
+      flex-shrink: 0;
+      width: 200px;
+      border-radius: 6px;
       background-size: cover;
       background-position: center;
+      background-color: #1a1a2e;
     }
-
-    .t1  { background: linear-gradient(135deg, #1a0000, #8b1a00, #ff4500); }
-    .t2  { background: linear-gradient(135deg, #000510, #001a40, #0055bb); }
-    .t3  { background: linear-gradient(135deg, #001a00, #003300, #1a6600); }
-    .t4  { background: linear-gradient(135deg, #1a001a, #4b0082, #8b008b); }
-    .t5  { background: linear-gradient(135deg, #1a1000, #3d2b00, #6b4900); }
-    .t6  { background: linear-gradient(135deg, #0a0a1a, #1a1a4b, #2a2a8b); }
-    .t7  { background: linear-gradient(135deg, #1a0a00, #5a2200, #c87800); }
-    .t8  { background: linear-gradient(135deg, #00001a, #00004b, #00008b); }
-    .t9  { background: linear-gradient(135deg, #0a1a00, #1a3300, #2d5a1b); }
-    .t10 { background: linear-gradient(135deg, #1a0000, #6b0000, #cc0000); }
-    .t11 { background: linear-gradient(135deg, #001a1a, #003333, #005555); }
-    .t12 { background: linear-gradient(135deg, #1a1a00, #3d3d00, #7a7a00); }
 
     .bg-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0,0,0,0.65);
       z-index: 1;
     }
 
-    /* ── NAVBAR ── */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
       padding: 16px 40px;
       z-index: 10;
     }
-
     .logo {
       font-family: 'Orbitron', sans-serif;
       font-size: 1.2rem;
@@ -74,7 +76,7 @@
       text-decoration: none;
     }
 
-    /* ── LOGIN CARD ── */
+    /* Card LOGIN di KANAN */
     .login-wrapper {
       position: relative;
       z-index: 10;
@@ -85,100 +87,109 @@
       max-width: 1100px;
       padding: 0 60px;
     }
-
     .login-card {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
+      background: rgba(15,15,15,0.80);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
       padding: 48px 44px;
-      width: 340px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      width: 360px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.8);
       animation: slideIn 0.5s ease forwards;
     }
-
     @keyframes slideIn {
       from { opacity: 0; transform: translateX(40px); }
       to   { opacity: 1; transform: translateX(0); }
     }
-
     .login-card h2 {
-      font-size: 2rem;
-      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
       color: #fff;
       text-align: center;
-      margin-bottom: 28px;
-      letter-spacing: 1px;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
     }
-
-    .form-group { margin-bottom: 16px; }
-
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+    .form-group { margin-bottom: 14px; }
     .form-group input {
       width: 100%;
       padding: 12px 16px;
-      background: rgba(255,255,255,0.85);
-      border: none;
-      border-radius: 6px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
       font-family: 'Rajdhani', sans-serif;
       font-size: 1rem;
       font-weight: 600;
-      color: #333;
+      color: #f0f0f0;
       outline: none;
-      transition: background 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s;
     }
-
-    .form-group input::placeholder { color: #888; }
-
-    .form-group input:focus {
-      background: #fff;
-      box-shadow: 0 0 0 2px rgba(230,57,70,0.5);
-    }
+    .form-group input::placeholder { color: #444; }
+    .form-group input:focus { border-color: #e63946; }
 
     .btn-login {
       width: 100%;
       padding: 13px;
-      background: rgba(255,255,255,0.75);
+      background: #e63946;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-family: 'Rajdhani', sans-serif;
       font-size: 1rem;
       font-weight: 700;
-      color: #333;
+      color: #fff;
       letter-spacing: 1px;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
     }
-
     .btn-login:hover {
-      background: #e63946;
-      color: #fff;
+      background: #c0303b;
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(230,57,70,0.45);
     }
 
+    .divider {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #333;
+      font-weight: 600;
+      margin: 18px 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%; width: 38%; height: 1px;
+      background: #222;
+    }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+
     .signup-link {
       display: block;
       text-align: center;
-      margin-top: 18px;
-      color: rgba(255,255,255,0.7);
-      font-size: 0.85rem;
+      color: #666;
+      font-size: 0.88rem;
       font-weight: 600;
-      letter-spacing: 1px;
       text-decoration: none;
-      transition: color 0.2s;
     }
+    .signup-link span { color: #e63946; font-weight: 700; }
+    .signup-link:hover span { text-decoration: underline; }
 
-    .signup-link:hover { color: #e63946; }
-
-    /* ── ERROR ── */
     .error-msg {
-      background: rgba(230,57,70,0.2);
-      border: 1px solid rgba(230,57,70,0.5);
+      background: rgba(230,57,70,0.1);
+      border: 1px solid rgba(230,57,70,0.4);
       color: #ff6b6b;
       padding: 10px 14px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.9rem;
       font-weight: 600;
       margin-bottom: 16px;
@@ -187,49 +198,73 @@
 </head>
 <body>
 
-  <!-- BACKGROUND GAME GRID -->
-  <div class="bg-grid">
-    <div class="bg-tile t1"></div>  <div class="bg-tile t2"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t4"></div>
-    <div class="bg-tile t5"></div>  <div class="bg-tile t6"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t8"></div>
-    <div class="bg-tile t9"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t11"></div> <div class="bg-tile t12"></div>
-    <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t6"></div>
-    <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div> <div class="bg-tile t8"></div>  <div class="bg-tile t2"></div>
-    <div class="bg-tile t12"></div> <div class="bg-tile t5"></div>  <div class="bg-tile t10"></div> <div class="bg-tile t9"></div>
-    <div class="bg-tile t6"></div>  <div class="bg-tile t1"></div>  <div class="bg-tile t4"></div>  <div class="bg-tile t11"></div>
-    <div class="bg-tile t8"></div>  <div class="bg-tile t3"></div>  <div class="bg-tile t7"></div>  <div class="bg-tile t5"></div>
-  </div>
+  <div class="bg-wrap" id="bgWrap"></div>
   <div class="bg-overlay"></div>
 
-  <!-- NAVBAR -->
-  <nav>
-    <a href="/" class="logo">GAME HUNTER</a>
-  </nav>
+  <nav><a href="/" class="logo">GAME HUNTER</a></nav>
 
-  <!-- LOGIN CARD -->
+  <!-- Card di KANAN -->
   <div class="login-wrapper">
     <div class="login-card">
-      <h2>Login</h2>
+      <h2>LOGIN</h2>
+      <div class="subtitle">Masuk ke akunmu</div>
 
-      <!-- Error dari Flask -->
       {% if error %}
       <div class="error-msg">⚠ {{ error }}</div>
       {% endif %}
 
       <form method="POST" action="/login">
         <div class="form-group">
-          <!-- name="email" agar cocok dengan routes.py -->
           <input type="email" name="email" placeholder="Email" required autocomplete="off"
                  value="{{ request.form.get('email', '') }}"/>
         </div>
         <div class="form-group">
           <input type="password" name="password" placeholder="Password" required/>
         </div>
-        <button type="submit" class="btn-login">Login</button>
+        <button type="submit" class="btn-login">Masuk</button>
       </form>
 
-      <a href="/register" class="signup-link">SIGN UP</a>
+      <div class="divider">atau</div>
+      <a href="/register" class="signup-link">Belum punya akun? <span>SIGN UP</span></a>
     </div>
   </div>
+
+  <script>
+    const bgImages = {{ bg_images | tojson }};
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const wrap    = document.getElementById('bgWrap');
+    const ROWS    = 5;
+    const PER_ROW = 10;
+    const TILES   = 16;
+
+    const shuffled = shuffle(bgImages);
+
+    for (let r = 0; r < ROWS; r++) {
+      const row = document.createElement('div');
+      row.className = 'bg-row ' + (r % 2 === 0 ? 'right' : 'left');
+
+      const rowImgs = shuffled.slice(r * PER_ROW, (r + 1) * PER_ROW);
+      const pool = [];
+      while (pool.length < TILES * 2) pool.push(...rowImgs);
+
+      for (let i = 0; i < TILES * 2; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'bg-tile';
+        tile.style.backgroundImage = `url('${pool[i % pool.length]}')`;
+        row.appendChild(tile);
+      }
+      wrap.appendChild(row);
+    }
+  </script>
 
 </body>
 </html>

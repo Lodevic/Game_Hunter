@@ -514,57 +514,73 @@
   }
 
   function doLogout() {
-    window.location.href = '/login';
+    window.location.href = '/logout';
   }
 
-  /* ── FAVORIT ── */
+  /* ── FAVORIT — DB based ── */
   let currentGameKey = null;
+  let favIds = new Set();
 
-  function getFavs() {
-    return JSON.parse(localStorage.getItem('gamehunter_favorites') || '[]');
+  // Load favorit dari server saat halaman dibuka
+  async function loadFavIds() {
+    try {
+      const res = await fetch('/favorit/list');
+      const data = await res.json();
+      favIds = new Set(data.favorites.map(String));
+      markFavorites();
+    } catch(e) {}
   }
 
-  function saveFavs(favs) {
-    localStorage.setItem('gamehunter_favorites', JSON.stringify(favs));
-  }
-
-  function toggleFavorit() {
+  async function toggleFavorit() {
     if (!currentGameKey) return;
-    let favs = getFavs();
     const btn = document.getElementById('btnFavorit');
-    if (favs.includes(currentGameKey)) {
-      favs = favs.filter(k => k !== currentGameKey);
-      saveFavs(favs);
-      btn.textContent = '♥ Favorit';
-      btn.classList.remove('saved');
-    } else {
-      favs.push(currentGameKey);
-      saveFavs(favs);
-      btn.textContent = '♥ Tersimpan!';
-      btn.classList.add('saved');
-    }
-    markFavorites();
+    btn.disabled = true;
+    try {
+      const res = await fetch('/favorit/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({game_id: parseInt(currentGameKey)})
+      });
+      const data = await res.json();
+      if (data.status === 'added') {
+        favIds.add(String(currentGameKey));
+        btn.textContent = '♥ Tersimpan!';
+        btn.classList.add('saved');
+      } else {
+        favIds.delete(String(currentGameKey));
+        btn.textContent = '♥ Favorit';
+        btn.classList.remove('saved');
+      }
+      markFavorites();
+    } catch(e) {}
+    btn.disabled = false;
   }
 
   function markFavorites() {
-    const favs = getFavs();
-    document.querySelectorAll('.fav-badge').forEach(el => el.remove());
-    document.querySelectorAll('.game-card').forEach(card => {
+    // Hanya hapus badge yang dibuat dinamis (bukan yang hardcode di HTML favorit.html)
+    document.querySelectorAll('.fav-badge.dynamic').forEach(el => el.remove());
+    document.querySelectorAll('.game-card, .game-card-popular').forEach(card => {
       const onclick = card.getAttribute('onclick') || '';
-      const match = onclick.match(/\['(\w+)'\]/);
-      if (match && favs.includes(match[1])) {
-        const badge = document.createElement('div');
-        badge.className = 'fav-badge';
-        badge.textContent = '♥';
-        card.style.position = 'relative';
-        card.appendChild(badge);
+      const match = onclick.match(/dbGames\[(\d+)\]/);
+      if (match && favIds.has(match[1])) {
+        // Jangan tambah kalau sudah ada badge (hardcode di favorit.html)
+        if (!card.querySelector('.fav-badge')) {
+          const badge = document.createElement('div');
+          badge.className = 'fav-badge dynamic';
+          badge.textContent = '♥';
+          card.style.position = 'relative';
+          card.appendChild(badge);
+        }
       }
     });
   }
 
+  loadFavIds();
+
   /* ── POPUP ── */
   function openPopup(g) {
-    currentGameKey = g.key;
+    if (!g) { console.error('openPopup: game object undefined'); return; }
+    currentGameKey = String(g.key);
 
     // Cover — pakai gambar dari API kalau ada, fallback ke gradient
     const cover = document.getElementById('popupCover');
@@ -579,8 +595,7 @@
 
     // Tombol favorit
     const btn = document.getElementById('btnFavorit');
-    const favs = getFavs();
-    if (favs.includes(String(g.key))) {
+    if (favIds.has(String(g.key))) {
       btn.textContent = '♥ Tersimpan!';
       btn.classList.add('saved');
     } else {

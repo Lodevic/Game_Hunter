@@ -106,45 +106,65 @@ def format_game_row(row):
     }
 
 
-def get_popular_games(limit=20):
-    """Ambil game paling populer berdasarkan rating tertinggi."""
-    query = text(f"""
-        SELECT id, game_name, developer, release_date, price, rating,
-               age_restriction, supported_os, user_defined_tags, other_features,
-               image_url
-        FROM best_selling_games
-        WHERE id BETWEEN 1 AND 20
-        ORDER BY id ASC
-    """)
+def get_random_bg_images(count=50):
+    """Ambil gambar game random dari RAWG untuk background login/register."""
     try:
-        rows = db.session.execute(query).fetchall()
+        import random
+        page = random.randint(1, 20)
+        res = requests.get(
+            'https://api.rawg.io/api/games',
+            params={
+                'key': RAWG_API_KEY,
+                'page': page,
+                'page_size': count,
+                'ordering': '-rating',
+            },
+            timeout=5
+        )
+        if res.status_code == 200:
+            results = res.json().get('results', [])
+            images = [r['background_image'] for r in results if r.get('background_image')]
+            return images[:count]
+    except Exception as e:
+        print(f"[RAWG BG ERROR] {e}")
+    return []
+
+
+def query_games(sql):
+    try:
+        rows = db.session.execute(text(sql)).fetchall()
         return [format_game_row(r) for r in rows]
     except Exception as e:
-        print(f"[DB ERROR popular] {e}")
+        print(f"[DB ERROR] {e}")
         return []
 
+SELECT_COLS = """SELECT id, game_name, developer, release_date, price, rating,
+               age_restriction, supported_os, user_defined_tags, other_features,
+               image_url FROM best_selling_games"""
+
+def get_popular_games(limit=20):
+    return query_games(f"{SELECT_COLS} WHERE id BETWEEN 1 AND 20 ORDER BY id ASC LIMIT {limit}")
+
+def get_top_rating(limit=25):
+    return query_games(f"{SELECT_COLS} ORDER BY rating DESC LIMIT {limit}")
+
+def get_most_reviewed(limit=25):
+    return query_games(f"{SELECT_COLS} ORDER BY all_reviews_number DESC LIMIT {limit}")
+
+def get_most_liked(limit=25):
+    return query_games(f"{SELECT_COLS} ORDER BY reviews_like_rate DESC LIMIT {limit}")
+
+def get_free_games(limit=25):
+    return query_games(f"{SELECT_COLS} WHERE price = 0 ORDER BY rating DESC LIMIT {limit}")
+
+def get_easy_games(limit=25):
+    return query_games(f"{SELECT_COLS} WHERE difficulty = 1 ORDER BY rating DESC LIMIT {limit}")
 
 def get_games_by_genre(keywords, limit=20):
-    """Query best_selling_games berdasarkan keyword di user_defined_tags."""
     if not keywords:
         return []
-    conditions = ' OR '.join([f"user_defined_tags LIKE :kw{i}" for i, _ in enumerate(keywords)])
-    params     = {f'kw{i}': f'%{kw}%' for i, kw in enumerate(keywords)}
-    query = text(f"""
-        SELECT id, game_name, developer, release_date, price, rating,
-               age_restriction, supported_os, user_defined_tags, other_features,
-               image_url
-        FROM best_selling_games
-        WHERE {conditions}
-        ORDER BY rating DESC
-        LIMIT {limit}
-    """)
-    try:
-        rows = db.session.execute(query, params).fetchall()
-        return [format_game_row(r) for r in rows]
-    except Exception as e:
-        print(f"[DB ERROR genre] {e}")
-        return []
+    conditions = ' OR '.join([f"user_defined_tags LIKE '%{kw}%'" for kw in keywords])
+    return query_games(f"{SELECT_COLS} WHERE {conditions} ORDER BY rating DESC LIMIT {limit}")
 
 
 # ════════════════════════════
@@ -174,7 +194,8 @@ def login():
                 return redirect(url_for('dashboard'))
             else:
                 error = 'Email atau password salah.'
-    return render_template('login.html', error=error)
+    bg_images = get_random_bg_images(50)
+    return render_template('login.html', error=error, bg_images=bg_images)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -203,7 +224,8 @@ def register():
             session['user_id']   = new_user.id
             session['user_name'] = new_user.name
             return redirect(url_for('dashboard'))
-    return render_template('register.html', error=error)
+    bg_images = get_random_bg_images(50)
+    return render_template('register.html', error=error, bg_images=bg_images)
 
 
 @app.route('/logout')
@@ -213,30 +235,107 @@ def logout():
 
 
 # ════════════════════════════
+#  FAVORIT API
+# ════════════════════════════
+
+@app.route('/favorit/toggle', methods=['POST'])
+@login_required
+def favorit_toggle():
+    from flask import jsonify
+    game_id = request.json.get('game_id')
+    user_id = session['user_id']
+    if not game_id:
+        return jsonify({'error': 'no game_id'}), 400
+    existing = db.session.execute(
+        text("SELECT id FROM user_favorites WHERE user_id=:u AND game_id=:g"),
+        {'u': user_id, 'g': game_id}
+    ).fetchone()
+    if existing:
+        db.session.execute(
+            text("DELETE FROM user_favorites WHERE user_id=:u AND game_id=:g"),
+            {'u': user_id, 'g': game_id}
+        )
+        db.session.commit()
+        return jsonify({'status': 'removed'})
+    else:
+        db.session.execute(
+            text("INSERT INTO user_favorites (user_id, game_id) VALUES (:u, :g)"),
+            {'u': user_id, 'g': game_id}
+        )
+        db.session.commit()
+        return jsonify({'status': 'added'})
+
+
+@app.route('/favorit/list')
+@login_required
+def favorit_list():
+    from flask import jsonify
+    user_id = session['user_id']
+    rows = db.session.execute(
+        text("SELECT game_id FROM user_favorites WHERE user_id=:u"),
+        {'u': user_id}
+    ).fetchall()
+    return jsonify({'favorites': [r.game_id for r in rows]})
+
+
+# ════════════════════════════
 #  HALAMAN YANG BUTUH LOGIN
 # ════════════════════════════
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    popular_games  = get_popular_games(limit=20)
-    genre_sections = []
-    for g in GENRE_MAP:
-        games = get_games_by_genre(g['keywords'], limit=20)
-        if games:
-            genre_sections.append({'label': g['label'], 'games': games})
+    popular_games = get_popular_games(limit=20)
+    top_rating    = get_top_rating(limit=25)
+    most_reviewed = get_most_reviewed(limit=25)
+    most_liked    = get_most_liked(limit=25)
+    free_games    = get_free_games(limit=25)
+    easy_games    = get_easy_games(limit=25)
 
     return render_template('dashboard.html',
                            active_page='dashboard',
                            user_name=session.get('user_name', 'User'),
                            popular_games=popular_games,
-                           genre_sections=genre_sections)
+                           top_rating=top_rating,
+                           most_reviewed=most_reviewed,
+                           most_liked=most_liked,
+                           free_games=free_games,
+                           easy_games=easy_games)
 
+
+GENRE_SECTIONS = [
+    {'key': 'action',     'label': '⚔️ ACTION GAMES',                   'badge': 'ACTION',      'keywords': ['Action', 'Fighting']},
+    {'key': 'fps',        'label': '🔫 FIRST-PERSON SHOOTER',            'badge': 'FPS',         'keywords': ['FPS', 'Shooter', 'Tactical']},
+    {'key': 'rpg',        'label': '🧙 ROLE-PLAYING GAMES',              'badge': 'RPG',         'keywords': ['RPG', 'Role-Playing', 'JRPG']},
+    {'key': 'strategy',   'label': '♟️ STRATEGY GAMES',                  'badge': 'STRATEGY',    'keywords': ['Strategy', 'Turn-Based', 'RTS']},
+    {'key': 'sports',     'label': '⚽ SPORTS GAMES',                    'badge': 'SPORTS',      'keywords': ['Sports', 'Football', 'Basketball']},
+    {'key': 'racing',     'label': '🏎️ RACING GAMES',                    'badge': 'RACING',      'keywords': ['Racing', 'Driving', 'Cars']},
+    {'key': 'simulation', 'label': '🏙️ SIMULATION GAMES',               'badge': 'SIMULATION',  'keywords': ['Simulation', 'Simulator', 'Management']},
+    {'key': 'openworld',  'label': '🌍 SANDBOX / OPEN WORLD',            'badge': 'OPEN WORLD',  'keywords': ['Open World', 'Sandbox']},
+    {'key': 'survival',   'label': '🪓 SURVIVAL GAMES',                  'badge': 'SURVIVAL',    'keywords': ['Survival', 'Crafting', 'Zombie']},
+    {'key': 'moba',       'label': '🏆 MOBA',                            'badge': 'MOBA',        'keywords': ['MOBA', 'Combat', 'Battle Arena']},
+]
 
 @app.route('/rekomendasi')
 @login_required
 def rekomendasi():
-    return render_template('rekomendasi_populer.html', active_page='rekomendasi')
+    sections = []
+    for g in GENRE_SECTIONS:
+        conds = ' OR '.join([f"user_defined_tags LIKE '%%{kw}%%'" for kw in g['keywords']])
+        sql = (
+            "SELECT id, game_name, developer, release_date, price, rating, "
+            "age_restriction, supported_os, user_defined_tags, other_features, image_url "
+            "FROM best_selling_games "
+            f"WHERE {conds} "
+            "ORDER BY all_reviews_number DESC "
+            "LIMIT 25"
+        )
+        games = query_games(sql)
+        if games:
+            sections.append({'label': g['label'], 'badge': g['badge'], 'games': games})
+    return render_template('rekomendasi_populer.html',
+                           active_page='rekomendasi',
+                           sections=sections)
 
 
 @app.route('/search')
@@ -248,7 +347,23 @@ def search():
 @app.route('/favorit')
 @login_required
 def favorit():
-    return render_template('favorit.html', active_page='favorit')
+    user_id = session['user_id']
+    rows = db.session.execute(
+        text("""
+            SELECT b.id, b.game_name, b.developer, b.release_date, b.price,
+                   b.rating, b.age_restriction, b.supported_os,
+                   b.user_defined_tags, b.other_features, b.image_url
+            FROM user_favorites f
+            JOIN best_selling_games b ON f.game_id = b.id
+            WHERE f.user_id = :u
+            ORDER BY f.created_at DESC
+        """),
+        {'u': user_id}
+    ).fetchall()
+    fav_games = [format_game_row(r) for r in rows]
+    fav_ids   = [g['id'] for g in fav_games]
+    return render_template('favorit.html', active_page='favorit',
+                           fav_games=fav_games, fav_ids=fav_ids)
 
 
 @app.route('/profile')

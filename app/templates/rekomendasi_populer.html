@@ -5,31 +5,41 @@
 {% block extra_style %}
 
 .main { padding: 32px 40px; }
+.genre-section { margin-bottom: 44px; }
 
 .section-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: #e63946;
-  letter-spacing: 2px;
-  margin-bottom: 24px;
+  font-size: 1rem; font-weight: 900;
+  color: #e63946; letter-spacing: 2px;
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .badge {
+  font-size: 0.6rem;
+  background: #e63946; color: #fff;
+  padding: 2px 8px; border-radius: 4px;
+  letter-spacing: 1px;
 }
 
-.game-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
+/* ── SCROLL ROW ── */
+.games-row {
+  display: flex; gap: 16px;
+  overflow-x: auto; padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
 }
+.games-row::-webkit-scrollbar { height: 4px; }
+.games-row::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
+/* ── GAME CARD ── */
 .game-card {
-  background: #1a1a1a;
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0; width: 175px;
+  background: #1a1a1a; border-radius: 10px;
+  overflow: hidden; cursor: pointer;
   border: 1px solid #222;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  position: relative;
 }
-
 .game-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 32px rgba(0,0,0,0.6);
@@ -37,116 +47,85 @@
 }
 
 .game-cover {
-  width: 100%;
-  height: 220px;
-  display: flex;
-  align-items: flex-end;
-  padding: 10px;
+  width: 175px; height: 220px;
+  display: flex; align-items: flex-end; padding: 10px;
   font-family: 'Orbitron', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 900;
+  font-size: 0.6rem; font-weight: 900;
   letter-spacing: 1px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  background-size: cover; background-position: center;
+  background-color: #1a1a1a; position: relative;
 }
-
-.c-elden     { background: linear-gradient(160deg, #1a0a00, #5a2200, #c87800); }
-.c-lastofus  { background: linear-gradient(160deg, #0a1500, #1a3300, #3d6b1b); }
-.c-spiderman { background: linear-gradient(160deg, #1a0000, #8b0000, #cc0000); }
-.c-dota2     { background: linear-gradient(160deg, #000510, #001a40, #003580); }
-.c-pubg      { background: linear-gradient(160deg, #1a1000, #3d2b00, #7a5500); }
-.c-outlast   { background: linear-gradient(160deg, #001a00, #003300, #004d00); }
-.c-phasmo    { background: linear-gradient(160deg, #050510, #0a0a30, #151550); }
-.c-fatal     { background: linear-gradient(160deg, #10000a, #300020, #500035); }
-.c-l4d2      { background: linear-gradient(160deg, #1a1000, #4d3000, #996600); }
-.c-efootball { background: linear-gradient(160deg, #001a00, #003300, #005500); }
+.game-cover::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.05) 60%);
+  z-index: 0;
+}
+.game-cover span { position: relative; z-index: 1; }
+.game-cover.no-image { background: linear-gradient(160deg,#1a1a1a,#2a2a2a,#1a1a1a); }
 
 .game-name {
-  padding: 12px 14px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #f0f0f0;
-  letter-spacing: 0.3px;
-  line-height: 1.3;
-  text-align: center;
+  padding: 10px 12px 4px;
+  font-size: 0.88rem; font-weight: 700;
+  color: #f0f0f0; text-align: center; line-height: 1.3;
+}
+.game-rating {
+  padding: 0 12px 12px;
+  font-size: 0.8rem; font-weight: 600;
+  color: #f4a261; text-align: center;
 }
 
 {% endblock %}
 
 {% block content %}
-
 <div class="main">
-  <div class="section-title">Game Rekomendasi Populer</div>
 
-  <div class="game-grid">
-
-    <div class="game-card" onclick="openPopup(games['elden'])">
-      <div class="game-cover c-elden">ELDEN RING</div>
-      <div class="game-name">Elden Ring</div>
+  {% for section in sections %}
+  <div class="genre-section">
+    <div class="section-title">
+      {{ section.label }}
+      <span class="badge">{{ section.badge }}</span>
     </div>
-
-    <div class="game-card" onclick="openPopup(games['lastofus'])">
-      <div class="game-cover c-lastofus">THE LAST OF US</div>
-      <div class="game-name">The Last Of Us Part 1</div>
+    <div class="games-row">
+      {% for game in section.games %}
+      <div class="game-card" onclick="openPopup(dbGames[{{ game.id }}])">
+        <div class="game-cover {% if not game.image %}no-image{% endif %}"
+             {% if game.image %}style="background-image: url('{{ game.image }}')"{% endif %}>
+          <span>{{ game.name | upper }}</span>
+        </div>
+        <div class="game-name">{{ game.name }}</div>
+        <div class="game-rating">⭐ {{ game.rating }}</div>
+      </div>
+      {% endfor %}
     </div>
-
-    <div class="game-card" onclick="openPopup(games['spiderman'])">
-      <div class="game-cover c-spiderman">SPIDER-MAN 2</div>
-      <div class="game-name">Marvel's Spider-Man 2</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['dota2'])">
-      <div class="game-cover c-dota2">DOTA 2</div>
-      <div class="game-name">Dota 2</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['pubg'])">
-      <div class="game-cover c-pubg">PUBG</div>
-      <div class="game-name">PUBG Battlegrounds</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['outlast'])">
-      <div class="game-cover c-outlast">OUTLAST</div>
-      <div class="game-name">Outlast Trinity</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['phasmo'])">
-      <div class="game-cover c-phasmo">PHASMOPHOBIA</div>
-      <div class="game-name">Phasmophobia</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['fatal'])">
-      <div class="game-cover c-fatal">FATAL FRAME</div>
-      <div class="game-name">Fatal Frame</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['l4d2'])">
-      <div class="game-cover c-l4d2">LEFT 4 DEAD 2</div>
-      <div class="game-name">Left 4 Dead 2</div>
-    </div>
-
-    <div class="game-card" onclick="openPopup(games['efootball'])">
-      <div class="game-cover c-efootball">eFOOTBALL</div>
-      <div class="game-name">eFootball™ 2025</div>
-    </div>
-
   </div>
-</div>
+  {% endfor %}
 
+</div>
 {% endblock %}
 
 {% block extra_script %}
 <script>
-  const games = {
-    elden:     { title: 'Elden Ring', coverClass: 'c-elden', coverText: 'ELDEN RING', developer: 'FromSoftware, Inc.', rilis: '25 Februari 2022', harga: '$59.99', rating: '4.8 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Action RPG, Open World, Dark Fantasy', fitur: 'Single-player, Steam Achievements, Steam Trading Cards, Steam Cloud' },
-    lastofus:  { title: 'The Last Of Us Part 1', coverClass: 'c-lastofus', coverText: 'THE LAST OF US', developer: 'Naughty Dog LLC', rilis: '28 Maret 2023', harga: '$59.99', rating: '4.1 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Story Rich, Shooter, Survival, Horror', fitur: 'Single-player, Steam Achievements, Steam Trading Cards, Remote Play on TV, Family Sharing' },
-    spiderman: { title: "Marvel's Spider-Man 2", coverClass: 'c-spiderman', coverText: 'SPIDER-MAN 2', developer: 'Insomniac Games', rilis: '30 Oktober 2024', harga: '$69.99', rating: '4.5 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'Action, Adventure, Superhero, Open World', fitur: 'Single-player, Steam Achievements, Steam Cloud, Full Controller Support' },
-    dota2:     { title: 'Dota 2', coverClass: 'c-dota2', coverText: 'DOTA 2', developer: 'Valve', rilis: '9 Juli 2013', harga: 'Free to Play', rating: '4.3 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'MOBA, Strategy, Multiplayer', fitur: 'Multi-player, Steam Achievements, Steam Trading Cards, Steam Workshop' },
-    pubg:      { title: 'PUBG Battlegrounds', coverClass: 'c-pubg', coverText: 'PUBG', developer: 'KRAFTON, Inc.', rilis: '21 Desember 2017', harga: 'Free to Play', rating: '3.9 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Battle Royale, Shooter, Survival, Multiplayer', fitur: 'Multi-player, Steam Achievements, Steam Trading Cards, Full Controller Support' },
-    outlast:   { title: 'Outlast Trinity', coverClass: 'c-outlast', coverText: 'OUTLAST', developer: 'Red Barrels', rilis: '25 April 2017', harga: '$39.99', rating: '4.6 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Horror, Survival, Stealth, Atmospheric', fitur: 'Single-player, Steam Achievements, Steam Cloud, Family Sharing' },
-    phasmo:    { title: 'Phasmophobia', coverClass: 'c-phasmo', coverText: 'PHASMOPHOBIA', developer: 'Kinetic Games', rilis: '18 September 2020', harga: '$13.99', rating: '4.7 / 5', usia: '13+', platform: 'Windows (PC)', genre: 'Horror, Co-op, Investigation, Multiplayer', fitur: 'Multi-player, Single-player, Steam Achievements, VR Support' },
-    fatal:     { title: 'Fatal Frame', coverClass: 'c-fatal', coverText: 'FATAL FRAME', developer: 'Koei Tecmo', rilis: '27 Oktober 2021', harga: '$49.99', rating: '4.2 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Horror, Adventure, Atmospheric, Story Rich', fitur: 'Single-player, Steam Achievements, Steam Cloud, Full Controller Support' },
-    l4d2:      { title: 'Left 4 Dead 2', coverClass: 'c-l4d2', coverText: 'LEFT 4 DEAD 2', developer: 'Valve', rilis: '17 November 2009', harga: '$9.99', rating: '4.8 / 5', usia: '17+', platform: 'Windows (PC)', genre: 'Co-op, Zombie, Shooter, Multiplayer', fitur: 'Multi-player, Single-player, Steam Achievements, Steam Workshop, Steam Trading Cards' },
-    efootball: { title: 'eFootball™ 2025', coverClass: 'c-efootball', coverText: 'eFOOTBALL', developer: 'KONAMI', rilis: '30 September 2021', harga: 'Free to Play', rating: '3.5 / 5', usia: '3+', platform: 'Windows (PC)', genre: 'Sports, Football, Multiplayer, Simulation', fitur: 'Multi-player, Single-player, Full Controller Support, Steam Achievements' },
+  const dbGames = {
+    {% for section in sections %}
+    {% for game in section.games %}
+    {{ game.id }}: {
+      key:       '{{ game.id }}',
+      title:     {{ game.name | tojson }},
+      coverText: {{ game.name | upper | tojson }},
+      coverClass: '',
+      developer: {{ game.developer | tojson }},
+      rilis:     {{ game.release | tojson }},
+      harga:     {{ game.price | tojson }},
+      rating:    {{ game.rating | tojson }},
+      usia:      {{ game.usia | tojson }},
+      platform:  {{ game.platform | tojson }},
+      genre:     {{ game.genre | tojson }},
+      fitur:     {{ game.fitur | tojson }},
+      image:     {{ (game.image or '') | tojson }},
+    },
+    {% endfor %}
+    {% endfor %}
   };
 </script>
 {% endblock %}
