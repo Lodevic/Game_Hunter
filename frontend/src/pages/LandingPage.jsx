@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -88,18 +89,10 @@ export default function LandingPage() {
         .ln-game-card img{width:100%;height:110px;object-fit:cover;display:block}
         .ln-game-card-name{padding:10px;font-size:0.82rem;font-weight:700;color:#ccc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-        .ln-footer{background:#0a0a0a;border-top:1px solid #1a1a1a;padding:32px 48px;display:flex;justify-content:space-between;align-items:flex-start;}
-        .ln-footer-logo{font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:900;color:#e63946;letter-spacing:2px;margin-bottom:12px;}
-        .ln-footer-contact{font-size:0.82rem;color:#444;font-weight:600;line-height:1.8}
-        .ln-footer-social{display:flex;gap:12px;align-items:center}
-        .ln-footer-soc{width:36px;height:36px;border-radius:50%;background:#1a1a1a;border:1px solid #222;display:flex;align-items:center;justify-content:center;color:#555;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
-        .ln-footer-soc:hover{border-color:#e63946;color:#e63946}
-
         /* popup */
         .ln-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.78);display:flex;align-items:center;justify-content:center;animation:fadeIn 0.15s ease;}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
         .ln-popup{background:#141414;border:1px solid #2a2a2a;border-radius:16px;width:360px;padding:40px 32px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.9);animation:slideUp 0.2s ease;}
         .ln-popup-icon{font-size:2.8rem;margin-bottom:16px}
         .ln-popup-title{font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:8px;}
@@ -113,7 +106,10 @@ export default function LandingPage() {
 
       {/* NAVBAR */}
       <nav className="ln-nav">
-        <div className="ln-logo">GAME HUNTER</div>
+        <div className="ln-logo" style={{display:'flex',alignItems:'center',gap:'10px'}}>
+          <img src="/Logo.png" alt="logo" style={{width:'28px',height:'28px',objectFit:'contain'}}/>
+          GAME HUNTER
+        </div>
         <div className="ln-navlinks">
           {navLinks.map(l => (
             <button key={l.key}
@@ -160,22 +156,14 @@ export default function LandingPage() {
       {/* FEATURE */}
       <section id="fitur" className="ln-feature">
         <div style={{
-          minWidth:'320px',
-          maxWidth:'480px',
-          flex:'1',
-          borderRadius:'12px',
-          overflow:'hidden',
-          flexShrink:0,
-          border:'1px solid #2a2a2a'
+          minWidth:'320px', maxWidth:'480px', flex:'1',
+          borderRadius:'12px', overflow:'hidden',
+          flexShrink:0, border:'1px solid #2a2a2a'
         }}>
-          <img 
-            src="/LP.gif" 
+          <img
+            src="/LP.gif"
             alt="Feature Demo"
-            style={{
-              width:'100%',
-              height:'auto',
-              display:'block'
-            }}
+            style={{width:'100%', height:'auto', display:'block'}}
           />
         </div>
         <p className="ln-feature-body">
@@ -211,25 +199,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="ln-footer">
-        <div>
-          <div className="ln-footer-logo">© 2025 GAME HUNTER</div>
-          <div className="ln-footer-contact">
-            <div style={{color:'#555',marginBottom:'4px',fontWeight:700}}>Contact us</div>
-            <div>gamehunterz@gmail.com</div>
-            <div>+6281234567890</div>
-          </div>
-        </div>
-        <div>
-          <div style={{color:'#555',fontSize:'0.82rem',fontWeight:700,marginBottom:'10px'}}>Follow us</div>
-          <div className="ln-footer-social">
-            <div className="ln-footer-soc">📷</div>
-            <div className="ln-footer-soc">▶</div>
-            <div className="ln-footer-soc">🎵</div>
-          </div>
-        </div>
-      </footer>
+      {/* FOOTER — pakai komponen yang sama dengan halaman lain */}
+      <Footer />
 
       {/* POPUP: harus login dulu */}
       {showPopup && (

@@ -5,17 +5,20 @@ from config import Config
 
 db = SQLAlchemy()
 
-app = Flask(__name__,
-    template_folder='templates',
-    static_folder='../static'
-)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SECURE']   = False
 
-app.config.from_object(Config)
-db.init_app(app)
+    db.init_app(app)
 
-# CORS — izinkan React akses Flask
-CORS(app,
-     origins=['http://localhost:5173'],
-     supports_credentials=True)
+    CORS(app,
+         origins=['http://localhost:5173'],
+         supports_credentials=True)
 
-from app import routes
+    from backend.routes.routes import register_routes
+    register_routes(app)
+
+    return app
