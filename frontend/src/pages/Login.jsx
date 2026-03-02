@@ -25,15 +25,25 @@ export default function Login() {
   }, []) // hanya jalan sekali saat mount
 
   async function handleSubmit(e) {
-    e.preventDefault()
-    setLoading(true); setError('')
-    try {
-      const data = await authAPI.login(form)
-      setUser({ name: data.user_name })
-      navigate('/dashboard')
-    } catch(err) { setError(err.message) }
-    setLoading(false)
+  e.preventDefault()
+  setLoading(true); setError('')
+  try {
+    const data = await authAPI.login(form)
+    
+    // Tambah pengecekan ini ↓
+    if (data.error) {
+      setError(data.error)
+      setLoading(false)
+      return  // ← stop di sini, jangan navigate
+    }
+
+    setUser({ name: data.user_name })
+    navigate('/dashboard')
+  } catch(err) { 
+    setError('Email atau password salah.')  // ← pesan lebih jelas
   }
+  setLoading(false)
+}
 
   const rows = [0,1,2,3,4]
   const shuffled = shuffledRef.current
@@ -71,6 +81,12 @@ export default function Login() {
       {/* LOGIN CARD */}
       <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:1100, padding:'0 60px', display:'flex', justifyContent:'flex-end' }}>
         <div className="auth-card" style={{animation:'slideIn 0.5s ease forwards'}}>
+          
+          <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'24px'}}>
+            <img src="/Logo.png" alt="logo" style={{width:'36px', height:'36px', objectFit:'contain'}}/>
+            <span style={{fontFamily:'Orbitron,sans-serif', fontSize:'1rem', fontWeight:900, color:'#fff', letterSpacing:'2px'}}>GAME HUNTER</span>
+          </div>
+
           <h2>LOGIN</h2>
           <div className="subtitle">Masuk ke akunmu</div>
           {error && <div className="error-msg">⚠ {error}</div>}

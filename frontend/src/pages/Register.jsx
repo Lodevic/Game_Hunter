@@ -67,6 +67,12 @@ export default function Register() {
 
       <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:1100, padding:'0 60px', display:'flex', justifyContent:'flex-end' }}>
         <div className="auth-card">
+
+          <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'24px'}}>
+            <img src="/Logo.png" alt="logo" style={{width:'36px', height:'36px', objectFit:'contain'}}/>
+            <span style={{fontFamily:'Orbitron,sans-serif', fontSize:'1rem', fontWeight:900, color:'#fff', letterSpacing:'2px'}}>GAME HUNTER</span>
+          </div>
+
           <h2>SIGN UP</h2>
           <div className="subtitle">Buat akun baru</div>
           {error && <div className="error-msg">⚠ {error}</div>}
