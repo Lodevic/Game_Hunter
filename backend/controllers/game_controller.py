@@ -95,7 +95,7 @@ def api_recommend():
     if not rows:
         return jsonify({'results': []})
 
-    game_docs  = [
+    game_docs = [
         (row.user_defined_tags or '').replace(',', ' ') + ' ' +
         (row.other_features or '').replace(',', ' ')
         for row in rows
@@ -115,6 +115,13 @@ def api_recommend():
             **format_game_row(rows[idx]),
             'similarity_score': round(float(scores[idx]), 4)
         })
+
+    # Sort: persentase sama (dibulatkan ke integer) → rating_raw tertinggi duluan
+    results.sort(key=lambda x: (
+        -round(x['similarity_score'] * 100),
+        -float(x.get('rating_raw', 0))
+    ))
+
     return jsonify({'results': results, 'query': {'genres': genres, 'fiturs': fiturs}})
 
 

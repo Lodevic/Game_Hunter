@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import Navbar    from '../components/Navbar'
-import Footer    from '../components/Footer'
-import GameCard  from '../components/GameCard'
-import GamePopup from '../components/GamePopup'
+import Navbar      from '../components/Navbar'
+import Footer      from '../components/Footer'
+import GameCard    from '../components/GameCard'
+import GamePopup   from '../components/GamePopup'
+import PageLoading from '../components/PageLoading'
 import { rekomendasiAPI, favoritAPI } from '../services/api'
 
 export default function Rekomendasi() {
@@ -28,7 +29,7 @@ export default function Rekomendasi() {
     })
   }
 
-  if (loading) return <div className="page-loading">⏳ Loading...</div>
+  if (loading) return <PageLoading />
 
   return (
     <>
@@ -36,10 +37,12 @@ export default function Rekomendasi() {
       <div className="main">
         {sections.map(sec => (
           <div className="genre-section" key={sec.label}>
-            <div className="section-title">{sec.label} <span className="badge">{sec.badge}</span></div>
+            <div className="section-title">
+              {sec.label} <span className="badge">{sec.badge}</span>
+            </div>
             <div className="games-row">
               {sec.games.map(game => (
-                <div key={game.id} style={{ position: 'relative', flexShrink: 0 }}>
+                <div key={game.id} style={{position:'relative', flexShrink:0}}>
                   {favIds.has(String(game.id)) && <div className="fav-badge">♥</div>}
                   <GameCard game={game} onClick={setPopup} />
                 </div>
@@ -49,7 +52,10 @@ export default function Rekomendasi() {
         ))}
       </div>
       <Footer />
-      {popup && <GamePopup game={popup} favIds={favIds} onClose={() => setPopup(null)} onFavChange={handleFavChange} />}
+      {popup && (
+        <GamePopup game={popup} favIds={favIds}
+          onClose={() => setPopup(null)} onFavChange={handleFavChange}/>
+      )}
     </>
   )
 }

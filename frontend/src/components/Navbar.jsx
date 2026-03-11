@@ -32,6 +32,7 @@ export default function Navbar() {
   const [editBio,     setEditBio]     = useState('')
   const [image,       setImage]       = useState(null)
   const [previewImg,  setPreviewImg]  = useState(null)
+  const [searchVal,   setSearchVal]   = useState('')
 
   useEffect(() => {
     setShowProfile(false)
@@ -49,7 +50,6 @@ export default function Navbar() {
       }).catch(() => {})
   }, [user])
 
-  // ✅ Dengerin event dari luar (misal refresh setelah save)
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.image) setImage(e.detail.image)
@@ -94,16 +94,22 @@ export default function Navbar() {
       setBio(editBio)
       setImage(previewImg)
       setEditMode(false)
-
-      // ✅ Broadcast ke semua komponen (Dashboard, dll) bahwa profil berubah
       window.dispatchEvent(new CustomEvent('profile-updated', {
         detail: { image: previewImg, bio: editBio }
       }))
     } catch(e) {}
   }
 
+  function handleSearch(e) {
+    e.preventDefault()
+    const q = searchVal.trim()
+    if (!q) return
+    navigate(`/search?q=${encodeURIComponent(q)}`)
+    setSearchVal('')
+  }
+
   const isValidImg = (src) => src && typeof src === 'string' && src.startsWith('data:image')
-  const isActive = (path) => location.pathname === path
+  const isActive   = (path) => location.pathname === path
 
   return (
     <>
@@ -111,44 +117,82 @@ export default function Navbar() {
         .navbar {
           position: sticky; top: 0; z-index: 100;
           display: flex; align-items: center;
-          padding: 0 40px; height: 60px;
+          padding: 0 20px; height: 60px;
           background: #0a0a0a;
           border-bottom: 1px solid #1a1a1a;
+          box-sizing: border-box;
+          overflow: hidden;
         }
         .logo {
           font-family: 'Orbitron', sans-serif;
-          font-size: 1.1rem; font-weight: 900;
+          font-size: 0.85rem; font-weight: 900;
           color: #fff; text-decoration: none;
-          letter-spacing: 2px; margin-right: auto;
+          letter-spacing: 2px; flex-shrink: 0;
+          display: flex; align-items: center; gap: 8px;
+          margin-right: auto;
         }
-        .nav-links { display: flex; gap: 32px; }
+
+        /* KANAN: search + menu + actions semua dalam satu grup */
+        .nav-right {
+          display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+        .navbar-search {
+          display: flex; align-items: center;
+          background: #111; border: 1px solid #222;
+          border-radius: 6px; overflow: hidden;
+          transition: border-color 0.2s;
+          width: 140px; flex-shrink: 0;
+        }
+        .navbar-search:focus-within { border-color: #e63946; }
+        .navbar-search input {
+          width: 100%; background: transparent; border: none;
+          padding: 6px 8px; color: #fff; outline: none;
+          font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 600;
+          min-width: 0;
+        }
+        .navbar-search input::placeholder { color: #444; }
+        .navbar-search button {
+          padding: 5px 7px; background: transparent; border: none;
+          color: #555; cursor: pointer; flex-shrink: 0;
+          transition: color 0.2s; border-left: 1px solid #222;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .navbar-search button:hover { color: #fff; }
+
+        .nav-links { display: flex; gap: 14px; align-items: center; flex-shrink: 0; }
         .nav-link {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 0.95rem; font-weight: 700;
+          font-size: 0.8rem; font-weight: 700;
           color: #666; text-decoration: none;
-          letter-spacing: 0.5px; transition: color 0.2s;
+          letter-spacing: 0.3px; transition: color 0.2s; white-space: nowrap;
         }
         .nav-link:hover { color: #fff; }
         .nav-link.active { color: #e63946; }
-        .nav-actions { display: flex; align-items: center; gap: 12px; margin-left: 32px; }
+
+        .nav-sep {
+          width: 1px; height: 18px; background: #222; flex-shrink: 0;
+        }
+
         .avatar-btn {
-          width: 36px; height: 36px; border-radius: 50%;
+          width: 32px; height: 32px; border-radius: 50%;
           background: #1f1f1f; border: 1.5px solid #2a2a2a;
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; color: #666; transition: all 0.2s;
-          overflow: hidden; padding: 0;
+          overflow: hidden; padding: 0; flex-shrink: 0;
         }
         .avatar-btn:hover { border-color: #e63946; }
-        .avatar-btn svg { width: 20px; height: 20px; }
+        .avatar-btn svg { width: 18px; height: 18px; }
         .btn-logout {
-          display: flex; align-items: center; gap: 6px;
-          padding: 7px 16px; background: transparent;
+          display: flex; align-items: center; gap: 4px;
+          padding: 6px 12px; background: transparent;
           border: 1.5px solid #222; border-radius: 6px;
           color: #555; font-family: 'Rajdhani', sans-serif;
-          font-size: 0.88rem; font-weight: 700;
-          cursor: pointer; transition: all 0.2s;
+          font-size: 0.8rem; font-weight: 700;
+          cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
         }
         .btn-logout:hover { border-color: #e63946; color: #e63946; }
+
+        /* OVERLAYS */
         .gh-overlay {
           position: fixed; inset: 0; z-index: 500;
           background: rgba(0,0,0,0.6);
@@ -181,14 +225,12 @@ export default function Navbar() {
           width: 80px; height: 80px; border-radius: 50%;
           background: #2a2a2a; border: 3px solid #e63946;
           display: flex; align-items: center; justify-content: center;
-          margin: 0 auto 14px; overflow: hidden; position: relative;
-          cursor: pointer;
+          margin: 0 auto 14px; overflow: hidden; position: relative; cursor: pointer;
         }
         .avatar-large img { width:100%; height:100%; object-fit:cover; }
         .avatar-large svg { width:44px; height:44px; }
         .avatar-edit-overlay {
-          position:absolute; inset:0;
-          background:rgba(0,0,0,0.55);
+          position:absolute; inset:0; background:rgba(0,0,0,0.55);
           display:flex; align-items:center; justify-content:center;
           opacity:0; transition:opacity 0.2s; font-size:1.2rem; color:#fff;
         }
@@ -253,17 +295,44 @@ export default function Navbar() {
       `}</style>
 
       <nav className="navbar">
-        <Link to="/dashboard" className="logo" style={{display:'flex',alignItems:'center',gap:'10px'}}>
-          <img src="/Logo.png" alt="logo" style={{width:'28px',height:'28px',objectFit:'contain'}}/>
+        {/* LOGO — kiri */}
+        <Link to="/dashboard" className="logo">
+          <img src="/Logo.png" alt="logo" style={{width:'26px',height:'26px',objectFit:'contain'}}/>
           GAME HUNTER
         </Link>
-        <div className="nav-links">
-          <Link to="/dashboard"   className={`nav-link ${isActive('/dashboard')   ? 'active':''}`}>Dashboard</Link>
-          <Link to="/rekomendasi" className={`nav-link ${isActive('/rekomendasi') ? 'active':''}`}>Game Rekomendasi</Link>
-          <Link to="/search"      className={`nav-link ${isActive('/search')      ? 'active':''}`}>Search Games</Link>
-          <Link to="/favorit"     className={`nav-link ${isActive('/favorit')     ? 'active':''}`}>Favorit Game</Link>
-        </div>
-        <div className="nav-actions">
+
+        {/* SEMUA ELEMEN KANAN dalam satu div */}
+        <div className="nav-right">
+          {/* Search box */}
+          <form className="navbar-search" onSubmit={handleSearch}>
+            <input
+              type="text"
+              placeholder="Cari game..."
+              value={searchVal}
+              onChange={e => setSearchVal(e.target.value)}
+            />
+            <button type="submit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </form>
+
+          {/* Garis pemisah */}
+          <div className="nav-sep"/>
+
+          {/* Menu links */}
+          <div className="nav-links">
+            <Link to="/dashboard"          className={`nav-link ${isActive('/dashboard')          ? 'active':''}`}>Dashboard</Link>
+            <Link to="/rekomendasi"        className={`nav-link ${isActive('/rekomendasi')        ? 'active':''}`}>Rekomendasi</Link>
+            <Link to="/sistem-rekomendasi" className={`nav-link ${isActive('/sistem-rekomendasi') ? 'active':''}`}>Sistem Rekomendasi</Link>
+            <Link to="/favorit"            className={`nav-link ${isActive('/favorit')            ? 'active':''}`}>Favorit Game</Link>
+          </div>
+
+          {/* Garis pemisah */}
+          <div className="nav-sep"/>
+
+          {/* Avatar + Keluar */}
           <button className="avatar-btn" onClick={openProfile} title="Profil Saya">
             {isValidImg(image)
               ? <img src={image} alt="avatar" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}}/>
