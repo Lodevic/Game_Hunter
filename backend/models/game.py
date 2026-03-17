@@ -6,7 +6,7 @@ from backend import db
 # ════════════════════════════
 SELECT_COLS = """SELECT id, game_name, developer, release_date, price, rating,
                age_restriction, supported_os, user_defined_tags, other_features,
-               image_url FROM best_selling_games"""
+               image_url, steam_app_id FROM best_selling_games"""
 
 GENRE_SECTIONS = [
     {'key': 'action',     'label': 'ACTION GAMES',         'badge': 'ACTION',      'keywords': ['Action', 'Fighting']},
@@ -37,19 +37,25 @@ def format_game_row(row):
         rating_raw = 0.0
         rating_str = '-'
 
+    try:
+        steam_app_id = int(row.steam_app_id) if row.steam_app_id else None
+    except Exception:
+        steam_app_id = None
+
     return {
-        'id':         row.id,
-        'name':       row.game_name or '-',
-        'developer':  row.developer or '-',
-        'release':    str(row.release_date) if row.release_date else '-',
-        'price':      harga,
-        'rating':     rating_str,
-        'rating_raw': rating_raw,
-        'usia':       row.age_restriction or '-',
-        'platform':   row.supported_os or 'Windows (PC)',
-        'genre':      row.user_defined_tags or '-',
-        'fitur':      row.other_features or '-',
-        'image':      row.image_url or '',
+        'id':           row.id,
+        'name':         row.game_name or '-',
+        'developer':    row.developer or '-',
+        'release':      str(row.release_date) if row.release_date else '-',
+        'price':        harga,
+        'rating':       rating_str,
+        'rating_raw':   rating_raw,
+        'usia':         row.age_restriction or '-',
+        'platform':     row.supported_os or 'Windows (PC)',
+        'genre':        row.user_defined_tags or '-',
+        'fitur':        row.other_features or '-',
+        'image':        row.image_url or '',
+        'steam_app_id': steam_app_id,
     }
 
 def query_games(sql, params=None):

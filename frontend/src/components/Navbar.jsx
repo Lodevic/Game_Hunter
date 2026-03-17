@@ -167,7 +167,11 @@ export default function Navbar() {
           letter-spacing: 0.3px; transition: color 0.2s; white-space: nowrap;
         }
         .nav-link:hover { color: #fff; }
-        .nav-link.active { color: #e63946; }
+        .nav-link.active {
+          color: #e63946;
+          border-bottom: 2px solid #e63946;
+          padding-bottom: 2px;
+        }
 
         .nav-sep {
           width: 1px; height: 18px; background: #222; flex-shrink: 0;
@@ -324,8 +328,11 @@ export default function Navbar() {
           {/* Menu links */}
           <div className="nav-links">
             <Link to="/dashboard"          className={`nav-link ${isActive('/dashboard')          ? 'active':''}`}>Dashboard</Link>
+            <div className="nav-sep"/>
             <Link to="/rekomendasi"        className={`nav-link ${isActive('/rekomendasi')        ? 'active':''}`}>Rekomendasi</Link>
+            <div className="nav-sep"/>
             <Link to="/sistem-rekomendasi" className={`nav-link ${isActive('/sistem-rekomendasi') ? 'active':''}`}>Sistem Rekomendasi</Link>
+            <div className="nav-sep"/>
             <Link to="/favorit"            className={`nav-link ${isActive('/favorit')            ? 'active':''}`}>Favorit Game</Link>
           </div>
 

@@ -13,6 +13,14 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
   const isFav = favIds.has(String(game?.id))
   if (!game) return null
 
+  // Bersihkan nama dari simbol ™ ® ©
+  const cleanName = (game.name || '').replace(/[™®©]/g, '').trim()
+
+  // Kalau ada steam_app_id langsung ke halaman game, kalau tidak pakai search
+  const steamUrl = game.steam_app_id
+    ? `https://store.steampowered.com/app/${game.steam_app_id}`
+    : `https://store.steampowered.com/search/?term=${encodeURIComponent(cleanName)}`
+
   function startTimer(len) {
     clearInterval(timerRef.current)
     if (len <= 1) return
@@ -34,12 +42,25 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
 
     async function fetchScreenshots() {
       try {
+        // Coba search_precise dulu
+        let rawgGame = null
         const searchRes = await fetch(
-          `https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(game.name)}&page_size=1&search_precise=true`
+          `https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1&search_precise=true`
         )
         const searchData = await searchRes.json()
-        const rawgGame = searchData.results?.[0]
+        rawgGame = searchData.results?.[0]
+
+        // Kalau tidak ketemu, coba tanpa precise
+        if (!rawgGame) {
+          const searchRes2 = await fetch(
+            `https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(cleanName)}&page_size=1`
+          )
+          const searchData2 = await searchRes2.json()
+          rawgGame = searchData2.results?.[0]
+        }
+
         if (!rawgGame) return
+
         const shotRes = await fetch(
           `https://api.rawg.io/api/games/${rawgGame.id}/screenshots?key=${RAWG_KEY}&page_size=5`
         )
@@ -67,7 +88,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
 
   const tags   = (game.genre || '-').split(',').map(t => t.trim()).filter(Boolean)
   const fiturs = (game.fitur  || '-').split(',').map(f => f.trim()).filter(Boolean)
-  const steamUrl = `https://store.steampowered.com/search/?term=${encodeURIComponent(game.name)}`
 
   return (
     <div className="popup-overlay show"
@@ -76,7 +96,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
         @keyframes gpFade { from{opacity:0;transform:scale(1.015)} to{opacity:1;transform:scale(1)} }
         @keyframes gpSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
         @keyframes timerBar { from{width:0%} to{width:100%} }
-
         .popup-overlay.show {
           position:fixed; inset:0; z-index:500;
           background:rgba(0,0,0,0.88);
@@ -95,7 +114,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
           box-shadow:0 40px 120px rgba(0,0,0,0.95);
           position:relative;
         }
-
         .gp-close {
           position:absolute; top:14px; right:14px; z-index:20;
           width:34px; height:34px; border-radius:50%;
@@ -105,8 +123,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
           transition:all 0.2s;
         }
         .gp-close:hover { background:#e63946; border-color:#e63946; color:#fff; }
-
-        /* KOLOM KIRI */
         .gp-left {
           border-right:1px solid #1e1e1e;
           overflow-y:auto; overflow-x:hidden;
@@ -115,8 +131,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
         }
         .gp-left::-webkit-scrollbar { width:3px; }
         .gp-left::-webkit-scrollbar-thumb { background:#1e1e1e; border-radius:3px; }
-
-        /* === PERUBAHAN: cover punya margin 12px di semua sisi, sudut rounded === */
         .gp-cover {
           margin: 12px 12px 0 12px;
           aspect-ratio:4/3; position:relative;
@@ -131,9 +145,7 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
           font-family:'Orbitron',sans-serif;
           font-size:0.58rem; font-weight:900; letter-spacing:2px; color:#fff;
         }
-
         .gp-left-body { padding:16px 18px 24px; display:flex; flex-direction:column; }
-
         .gp-game-name {
           font-family:'Orbitron',sans-serif; font-size:0.82rem;
           font-weight:900; color:#fff; margin-bottom:14px; line-height:1.4;
@@ -157,9 +169,7 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
         }
         .gp-btn-steam:hover { background:#2a475e; border-color:#2a475e; }
         .gp-btn-steam svg { width:15px; height:15px; fill:currentColor; flex-shrink:0; }
-
         .gp-divider { height:1px; background:#1a1a1a; margin-bottom:14px; }
-
         .gp-info-row {
           display:flex; justify-content:space-between; align-items:baseline;
           padding:8px 0; border-bottom:1px solid #181818; gap:8px;
@@ -174,8 +184,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
           font-family:'Rajdhani',sans-serif; font-size:0.88rem;
           font-weight:700; color:#bbb; text-align:right;
         }
-
-        /* KOLOM KANAN */
         .gp-right {
           display:flex; flex-direction:column;
           overflow-y:auto; overflow-x:hidden;
@@ -183,7 +191,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
         }
         .gp-right::-webkit-scrollbar { width:3px; }
         .gp-right::-webkit-scrollbar-thumb { background:#1e1e1e; border-radius:3px; }
-
         .gp-slideshow {
           width:100%; aspect-ratio:16/9;
           position:relative; overflow:hidden;
@@ -214,7 +221,6 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
         .gp-arrow:hover { background:#e63946; border-color:#e63946; }
         .gp-arrow-l { left:12px; }
         .gp-arrow-r { right:12px; }
-
         .gp-bottom-bar {
           flex-shrink:0; padding:8px 16px 6px;
           background:#0d0d0d;
@@ -235,9 +241,7 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
           height:100%; background:#e63946; border-radius:2px;
           animation:timerBar 5s linear;
         }
-
         .gp-right-body { padding:18px 20px 24px; }
-
         .gp-section-title {
           font-family:'Orbitron',sans-serif; font-size:0.6rem;
           font-weight:900; letter-spacing:3px; color:#3a3a3a;
@@ -278,20 +282,23 @@ export default function GamePopup({ game, favIds, onClose, onFavChange }) {
               onClick={toggleFav} disabled={saving}>
               ♥ {isFav ? 'Tersimpan!' : 'Favorit'}
             </button>
+
             <a className="gp-btn-steam" href={steamUrl} target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.52 3.73 10.17 8.84 11.54L12.53 18c.16-.61.1-1.26-.2-1.84l-1.18-2.28a3.27 3.27 0 0 0-1.42-3.7 3.27 3.27 0 0 0-4.46 1.2L3.5 9.5A8.5 8.5 0 0 1 12 3.5a8.5 8.5 0 0 1 8.5 8.5 8.5 8.5 0 0 1-8.5 8.5h-.15l-3.2 3.27A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm-1.77 15.5a2 2 0 0 1-2-2 2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 1-2 2z"/></svg>
+              <svg viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.52 3.73 10.17 8.84 11.54L12.53 18c.16-.61.1-1.26-.2-1.84l-1.18-2.28a3.27 3.27 0 0 0-1.42-3.7 3.27 3.27 0 0 0-4.46 1.2L3.5 9.5A8.5 8.5 0 0 1 12 3.5a8.5 8.5 0 0 1 8.5 8.5 8.5 8.5 0 0 1-8.5 8.5h-.15l-3.2 3.27A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63 0 12 0zm-1.77 15.5a2 2 0 0 1-2-2 2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 1-2 2z"/>
+              </svg>
               Buka di Steam
             </a>
 
             <div className="gp-divider"/>
 
             {[
-              ['Developer',    game.developer],
-              ['Tanggal Rilis',game.release],
-              ['Harga',        game.price],
-              ['Rating',       game.rating],
-              ['Rating Usia',  game.usia],
-              ['Platform',     game.platform],
+              ['Developer',     game.developer],
+              ['Tanggal Rilis', game.release],
+              ['Harga',         game.price],
+              ['Rating',        game.rating],
+              ['Rating Usia',   game.usia],
+              ['Platform',      game.platform],
             ].map(([label, val]) => (
               <div className="gp-info-row" key={label}>
                 <span className="gp-info-label">{label}</span>
