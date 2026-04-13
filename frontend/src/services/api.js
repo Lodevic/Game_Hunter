@@ -8,12 +8,14 @@ async function req(method, path, body = null) {
     credentials: 'include',
   }
   if (body) opts.body = JSON.stringify(body)
-
   const res  = await fetch(BASE + path, opts)
   const data = await res.json()
 
-  // Jangan throw — return data apa adanya supaya caller bisa cek res.error
-  // Hanya throw kalau benar-benar network error (sudah dihandle fetch)
+  // Kalau backend return error, throw supaya catch bisa tangkap
+  if (!res.ok || data.error) {
+    throw new Error(data.error || 'Terjadi kesalahan.')
+  }
+
   return data
 }
 

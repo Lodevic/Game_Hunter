@@ -25,13 +25,32 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true); setError('')
+    setError('')
+
+    // Validasi frontend
+    if (form.name.trim().length < 3) {
+      return setError('Username minimal 3 karakter.')
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      return setError('Format email tidak valid.')
+    }
+    if (form.password.length < 6) {
+      return setError('Password minimal 6 karakter.')
+    }
+    if (form.password !== form.confirm_password) {
+      return setError('Password dan konfirmasi password tidak cocok.')
+    }
+
+    setLoading(true)
     try {
       const data = await authAPI.register(form)
       setUser({ name: data.user_name })
       navigate('/dashboard')
-    } catch(err) { setError(err.message) }
+    } catch(err) {
+      setError(err.message || 'Terjadi kesalahan, coba lagi.')
+    }
     setLoading(false)
+
   }
 
   const set = field => e => setForm({...form, [field]: e.target.value})

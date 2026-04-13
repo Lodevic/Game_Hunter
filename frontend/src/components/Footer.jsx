@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="footer-left">
-        <div className="footer-logo"><span>© 2025</span> GAME HUNTER</div>
+        <div className="footer-logo"><span>© 2026</span> GAME HUNTER</div>
         <p>Contact us<br/>gamehunter@email.com<br/>+6281234567890</p>
       </div>
       <div className="footer-right">

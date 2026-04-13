@@ -134,7 +134,7 @@ def api_favorit():
     rows = db.session.execute(text("""
         SELECT b.id, b.game_name, b.developer, b.release_date, b.price,
                b.rating, b.age_restriction, b.supported_os,
-               b.user_defined_tags, b.other_features, b.image_url
+               b.user_defined_tags, b.other_features, b.image_url, b.steam_app_id
         FROM user_favorites f
         JOIN best_selling_games b ON f.game_id = b.id
         WHERE f.user_id = :u ORDER BY f.created_at DESC
