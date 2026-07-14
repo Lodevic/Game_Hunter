@@ -78,16 +78,26 @@ def api_recommend():
     from sklearn.metrics.pairwise import cosine_similarity
     import numpy as np
 
-    data   = request.get_json() or {}
-    genres = data.get('genres', [])
-    fiturs = data.get('fiturs', [])
+    # ──— Menerima Input Genre, Fitur, dan Filter Harga ──
+    data         = request.get_json() or {}
+    genres       = data.get('genres', [])
+    fiturs       = data.get('fiturs', [])
+    price_filter = data.get('price_filter', 'semua')   # 'semua' | 'gratis' | 'berbayar'
 
     if not genres and not fiturs:
         return jsonify({'error': 'Pilih minimal 1 genre atau fitur!'}), 400
 
+    # ──— Mengambil Data Game dari DB (sudah difilter harga) ─────
+    if price_filter == 'gratis':
+        price_cond = "AND (price IS NULL OR price = 0)"
+    elif price_filter == 'berbayar':
+        price_cond = "AND price > 0"
+    else:
+        price_cond = ""
+
     try:
         rows = db.session.execute(text(
-            f"{SELECT_COLS} WHERE user_defined_tags IS NOT NULL"
+            f"{SELECT_COLS} WHERE user_defined_tags IS NOT NULL {price_cond}"
         )).fetchall()
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -95,18 +105,37 @@ def api_recommend():
     if not rows:
         return jsonify({'results': []})
 
+    # ──— Praproses dan Pembentukan Dokumen
+    def clean_text(text):
+        # Pisahkan per term dulu (berdasarkan koma)
+        terms = [t.strip() for t in text.split(',') if t.strip()]
+        # Tiap term: ganti spasi, strip, dan tanda baca jadi underscore
+        terms = [t.replace(' ', '_').replace('-', '_').replace('/', '_').lower() for t in terms]
+        return ' '.join(terms)
+
     game_docs = [
-        (row.user_defined_tags or '').replace(',', ' ') + ' ' +
-        (row.other_features or '').replace(',', ' ')
+        clean_text(row.user_defined_tags or '') + ' ' +
+        clean_text(row.other_features or '')
         for row in rows
     ]
-    user_query   = ' '.join(genres + fiturs)
+    user_query = clean_text(','.join(genres + fiturs))
     all_docs     = game_docs + [user_query]
-    vectorizer   = TfidfVectorizer(stop_words='english')
+
+    # ──— Vektorisasi TF-IDF ─────────────
+    vectorizer   = TfidfVectorizer(
+        stop_words=None,       # tidak hapus kata apapun
+        use_idf=True,
+        smooth_idf=False,      # rumus log(N/DF) persis seperti manual
+        sublinear_tf=False,    # TF tetap biner
+        norm='l2'              # normalisasi L2 untuk cosine similarity
+    )
     tfidf_matrix = vectorizer.fit_transform(all_docs)
+
+    # ──— Perhitungan Cosine Similarity ───
     scores       = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1]).flatten()
     top_indices  = scores.argsort()[::-1][:20]
 
+    # ──— Penyusunan dan Pengurutan Hasil ─
     results = []
     for idx in top_indices:
         if scores[idx] == 0:
@@ -122,7 +151,10 @@ def api_recommend():
         -float(x.get('rating_raw', 0))
     ))
 
-    return jsonify({'results': results, 'query': {'genres': genres, 'fiturs': fiturs}})
+    return jsonify({
+        'results': results,
+        'query': {'genres': genres, 'fiturs': fiturs, 'price_filter': price_filter}
+    })
 
 
 # ════════════════════════════

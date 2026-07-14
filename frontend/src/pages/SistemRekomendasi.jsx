@@ -4,7 +4,6 @@ import Footer    from '../components/Footer'
 import GameCard  from '../components/GameCard'
 import GamePopup from '../components/GamePopup'
 import { favoritAPI } from '../services/api'
-import PageLoading from '../components/PageLoading'
 
 const GENRES = [
   '2.5D','2D','Action','Adventure','Anime','Automation','Building','CRPG',
@@ -15,7 +14,6 @@ const GENRES = [
   'Stealth','Story Rich','Strategy','Survival','Tactical','Turn-Based',
   'Visual Novel','War'
 ]
-
 const FITURS = [
   'Single-player','Online Co-op','Online PvP','LAN Co-op','LAN PvP',
   'Cross-Platform Multiplayer','Family Sharing','In-App Purchases',
@@ -35,7 +33,6 @@ const IconTarget = () => (
     <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
   </svg>
 )
-
 const IconGamepad = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
     <path d="M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5S19.33 12 18.5 12z"/>
@@ -50,6 +47,7 @@ export default function SistemRekomendasi() {
   const [loading,     setLoading]     = useState(false)
   const [popup,       setPopup]       = useState(null)
   const [favIds,      setFavIds]      = useState(new Set())
+  const [priceFilter, setPriceFilter] = useState('semua')
 
   function toggleGenre(g) {
     setSelGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
@@ -67,19 +65,18 @@ export default function SistemRekomendasi() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ genres: selGenres, fiturs: selFiturs })
+          // kirim price_filter ke backend
+          body: JSON.stringify({ genres: selGenres, fiturs: selFiturs, price_filter: priceFilter })
         }).then(r => r.json()),
         favoritAPI.getIds()
       ])
-
       const sorted = (res.results || []).sort((a, b) => {
         const pctA = Math.round(parseFloat(a.similarity_score) * 100)
         const pctB = Math.round(parseFloat(b.similarity_score) * 100)
         if (pctB !== pctA) return pctB - pctA
         return parseFloat(b.rating_raw || 0) - parseFloat(a.rating_raw || 0)
       })
-
-      setResults(sorted)
+      setResults(sorted.slice(0, 10))
       setFavIds(new Set(fav.favorites.map(String)))
       setSearched(true)
     } catch(e) { console.error(e) }
@@ -161,7 +158,7 @@ export default function SistemRekomendasi() {
           background: rgba(74,144,217,0.12); border: 1px solid rgba(74,144,217,0.4);
           color: #4a90d9; font-size: 0.78rem; font-weight: 700;
         }
-        .rec-actions { display: flex; gap: 12px; margin-bottom: 40px; align-items: center; }
+        .rec-actions { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
         .btn-rec {
           display: flex; align-items: center; gap: 8px;
           padding: 14px 36px; background: #e63946; border: none;
@@ -180,7 +177,27 @@ export default function SistemRekomendasi() {
           cursor: pointer; transition: all 0.2s;
         }
         .btn-reset:hover { border-color: #444; color: #666; }
-
+        .price-filter-wrap {
+          display: flex; gap: 8px; align-items: center;
+          margin-bottom: 20px;
+        }
+        .price-filter-label {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.8rem; color: #555;
+          font-weight: 700; letter-spacing: 1px;
+          margin-right: 4px;
+        }
+        .price-btn {
+          padding: 6px 16px; border-radius: 6px;
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 0.82rem; font-weight: 700;
+          letter-spacing: 1px; cursor: pointer;
+          border: 1.5px solid #222;
+          background: #111; color: #555;
+          text-transform: uppercase; transition: all 0.15s;
+        }
+        .price-btn:hover { border-color: #444; color: #888; }
+        .price-btn.active { border-color: #e63946; background: rgba(230,57,70,0.12); color: #e63946; }
         @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         .spinner {
           width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2);
@@ -188,7 +205,6 @@ export default function SistemRekomendasi() {
           animation: spin 0.7s linear infinite; flex-shrink: 0;
         }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
         .loading-state {
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
@@ -228,7 +244,6 @@ export default function SistemRekomendasi() {
         }
         .pl-dot:nth-child(2) { animation-delay: 0.2s; }
         .pl-dot:nth-child(3) { animation-delay: 0.4s; }
-
         .result-header {
           display: flex; align-items: center; gap: 16px;
           margin-bottom: 24px; padding-bottom: 16px;
@@ -245,19 +260,27 @@ export default function SistemRekomendasi() {
           font-size: 0.9rem; color: #555; font-weight: 600;
         }
         .sim-badge {
-          position: absolute; top: 8px; left: 8px;
+          position: absolute; top: 8px; right: 8px;
           background: rgba(0,0,0,0.85); color: #4ade80;
           font-size: 0.65rem; font-weight: 900;
           padding: 3px 8px; border-radius: 4px; z-index: 10;
           font-family: 'Orbitron', sans-serif;
           border: 1px solid rgba(74,222,128,0.3);
         }
+        .rank-badge {
+          position: absolute; top: 8px; left: 8px; z-index: 11;
+          background: rgba(0,0,0,0.85); color: #e63946;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.65rem; font-weight: 900;
+          padding: 3px 8px; border-radius: 4px;
+          border: 1px solid rgba(230,57,70,0.4);
+          letter-spacing: 1px;
+        }
         .fav-badge-rek {
           position: absolute; top: 6px; right: 6px; z-index: 10;
           background: rgba(230,57,70,0.9);
           color: #fff; font-size: 0.65rem;
-          padding: 2px 6px; border-radius: 4px;
-          font-weight: 900;
+          padding: 2px 6px; border-radius: 4px; font-weight: 900;
         }
         .empty-state-rek {
           display: flex; flex-direction: column;
@@ -270,24 +293,23 @@ export default function SistemRekomendasi() {
           font-size: 0.8rem; letter-spacing: 3px; color: #333;
         }
         .rek-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 16px;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 16px; align-items: stretch;
         }
         .rek-card-wrap {
-          position: relative;
-          width: 220px;
-          flex-shrink: 0;
+          position: relative; width: 100%;
+          min-width: 0; overflow: hidden;
         }
         .rek-card-wrap .game-card {
-          width: 220px !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
         }
       `}</style>
 
       <Navbar />
       <div className="rek-page">
-
         <div className="rek-hero">
           <div className="rek-hero-title">
             <IconTarget />
@@ -297,7 +319,6 @@ export default function SistemRekomendasi() {
         </div>
 
         <div className="rek-content">
-
           {/* FILTER GENRE */}
           <div className="filter-section">
             <div className="filter-label"><span/>GENRE GAME</div>
@@ -322,6 +343,22 @@ export default function SistemRekomendasi() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* FILTER HARGA — sebelum cari rekomendasi */}
+          <div className="price-filter-wrap" style={{marginBottom:'24px'}}>
+            <span className="price-filter-label">FILTER HARGA :</span>
+            {[
+              { key: 'semua',    label: '🎮 Semua'   },
+              { key: 'gratis',   label: '🆓 Gratis'  },
+              { key: 'berbayar', label: '💰 Berbayar' },
+            ].map(opt => (
+              <button key={opt.key}
+                className={`price-btn ${priceFilter === opt.key ? 'active' : ''}`}
+                onClick={() => setPriceFilter(opt.key)}>
+                {opt.label}
+              </button>
+            ))}
           </div>
 
           {/* SELECTION PREVIEW */}
@@ -355,6 +392,7 @@ export default function SistemRekomendasi() {
               <button className="btn-reset" onClick={() => {
                 setSelGenres([]); setSelFiturs([])
                 setResults([]); setSearched(false)
+                setPriceFilter('semua')
               }}>Reset Filter</button>
             )}
           </div>
@@ -388,6 +426,7 @@ export default function SistemRekomendasi() {
                 </div>
                 <div className="result-count">{results.length} game ditemukan</div>
               </div>
+
               {results.length === 0 ? (
                 <div className="empty-state-rek">
                   <IconGamepad />
@@ -395,8 +434,9 @@ export default function SistemRekomendasi() {
                 </div>
               ) : (
                 <div className="rek-grid">
-                  {results.map(game => (
+                  {results.map((game, index) => (
                     <div key={game.id} className="rek-card-wrap">
+                      <div className="rank-badge">#{index + 1}</div>
                       {favIds.has(String(game.id)) && (
                         <div className="fav-badge-rek">♥</div>
                       )}
@@ -418,7 +458,6 @@ export default function SistemRekomendasi() {
               <div>PILIH GENRE DAN FITUR DI ATAS UNTUK MULAI</div>
             </div>
           )}
-
         </div>
       </div>
 

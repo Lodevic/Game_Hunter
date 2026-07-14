@@ -72,6 +72,12 @@ export default function Search() {
           font-family: 'Rajdhani', sans-serif;
           font-size: 0.9rem; color: #555; font-weight: 600;
         }
+        .fav-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 20px;
+          justify-items: center;
+        }
       `}</style>
 
       <Navbar />

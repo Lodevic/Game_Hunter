@@ -1,11 +1,18 @@
 export default function GameCard({ game, onClick, size = 'normal' }) {
   const isPopular = size === 'popular'
 
+  const cardWidth   = isPopular ? 260 : 220
+  const coverHeight = isPopular ? 195 : 165   // 3:4 ratio tetap
+  const namePad     = isPopular ? '8px 12px 4px' : '8px 10px 4px'
+  const ratingPad   = isPopular ? '2px 12px 10px' : '2px 10px 10px'
+  const nameSz      = isPopular ? '0.9rem' : '0.85rem'
+  const ratingSz    = isPopular ? '0.82rem' : '0.78rem'
+  const spanSz      = isPopular ? '0.65rem' : '0.6rem'
+
   return (
     <>
       <style>{`
-        .game-card {
-          width: 220px;
+        .game-card, .game-card-popular {
           background: #141414;
           border-radius: 10px;
           overflow: hidden;
@@ -14,84 +21,55 @@ export default function GameCard({ game, onClick, size = 'normal' }) {
           transition: transform 0.2s, border-color 0.2s;
           flex-shrink: 0;
         }
-        .game-card:hover {
+        .game-card { width: 220px; }
+        .game-card-popular { width: 260px; }
+        .game-card:hover, .game-card-popular:hover {
           transform: translateY(-4px);
           border-color: #e63946;
         }
-        .game-card-popular {
-          width: 260px;
-          background: #141414;
-          border-radius: 10px;
+        .game-cover-wrap {
+          width: 100%;
+          position: relative;
           overflow: hidden;
-          border: 1px solid #1f1f1f;
-          cursor: pointer;
-          transition: transform 0.2s, border-color 0.2s;
-          flex-shrink: 0;
+          background-color: #1a1a1a;
         }
-        .game-card-popular:hover {
-          transform: translateY(-4px);
-          border-color: #e63946;
-        }
-
-        .game-cover {
+        .game-cover-wrap img {
           width: 100%;
-          aspect-ratio: 4/3;
-          background-size: cover;
-          background-position: center top;
-          background-color: #1a1a1a;
-          position: relative;
-          display: flex; align-items: flex-end;
+          height: 100%;
+          object-fit: cover;
+          object-position: center top;
+          display: block;
         }
-        .game-cover-popular {
+        .game-cover-wrap .no-img-placeholder {
           width: 100%;
-          aspect-ratio: 4/3;
-          background-size: cover;
-          background-position: center top;
-          background-color: #1a1a1a;
-          position: relative;
-          display: flex; align-items: flex-end;
+          height: 100%;
+          background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #333;
+          font-size: 2rem;
         }
-        .game-cover.no-image,
-        .game-cover-popular.no-image {
-          background-color: #1a1a1a;
-        }
-        .game-cover span,
-        .game-cover-popular span {
+        .game-cover-wrap .cover-title {
           position: absolute; bottom: 0; left: 0; right: 0;
           padding: 18px 8px 6px;
           background: linear-gradient(transparent, rgba(0,0,0,0.85));
           font-family: 'Orbitron', sans-serif;
-          font-size: 0.6rem; font-weight: 900;
+          font-weight: 900;
           letter-spacing: 1px; color: #fff;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-
-        .game-name {
-          padding: 8px 10px 4px;
+        .game-name-text {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 0.85rem; font-weight: 700;
+          font-weight: 700;
           color: #ccc;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .game-name-popular {
-          padding: 8px 12px 4px;
+        .game-rating-text {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 0.9rem; font-weight: 700;
-          color: #ccc;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          font-weight: 700;
+          color: #888;
         }
-
-        .game-rating {
-          padding: 2px 10px 10px;
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.78rem; font-weight: 700; color: #888;
-        }
-        .game-rating-popular {
-          padding: 2px 12px 10px;
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.82rem; font-weight: 700; color: #888;
-        }
-
         .fav-badge {
           position: absolute; top: 6px; right: 6px; z-index: 5;
           background: rgba(230,57,70,0.9);
@@ -103,18 +81,43 @@ export default function GameCard({ game, onClick, size = 'normal' }) {
 
       <div
         className={isPopular ? 'game-card-popular' : 'game-card'}
+        style={{ width: cardWidth }}
         onClick={() => onClick(game)}
       >
-        <div
-          className={`game-cover${isPopular ? '-popular' : ''} ${!game.image ? 'no-image' : ''}`}
-          style={game.image ? {
-            backgroundImage: `url('${game.image}')`,
-          } : {}}
-        >
-          <span>{game.name?.toUpperCase()}</span>
+        {/* Cover Image — tinggi tetap, tidak bergantung pada aspect-ratio */}
+        <div className="game-cover-wrap" style={{ height: coverHeight }}>
+          {game.image ? (
+            <img
+              src={game.image}
+              alt={game.name}
+              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            />
+          ) : null}
+          {/* Fallback kalau gambar tidak ada / gagal load */}
+          <div
+            className="no-img-placeholder"
+            style={{ display: game.image ? 'none' : 'flex', height: coverHeight }}
+          >
+            🎮
+          </div>
+          <div className="cover-title" style={{ fontSize: spanSz }}>
+            {game.name?.toUpperCase()}
+          </div>
         </div>
-        <div className={isPopular ? 'game-name-popular' : 'game-name'}>{game.name}</div>
-        <div className={isPopular ? 'game-rating-popular' : 'game-rating'}>⭐ {game.rating}</div>
+
+        {/* Info */}
+        <div
+          className="game-name-text"
+          style={{ padding: namePad, fontSize: nameSz }}
+        >
+          {game.name}
+        </div>
+        <div
+          className="game-rating-text"
+          style={{ padding: ratingPad, fontSize: ratingSz }}
+        >
+          ⭐ {game.rating}
+        </div>
       </div>
     </>
   )
